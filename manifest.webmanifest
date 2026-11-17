@@ -1,0 +1,15 @@
+{
+  "name": "Drug Bag – EMT medicines",
+  "short_name": "Drug Bag",
+  "description": "Learn every EMT medicine in the NZ Clinical Practice Guidelines.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3fb",
+  "theme_color": "#f6f3fb",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
