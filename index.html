@@ -491,8 +491,8 @@ ol.per-drug{list-style:none;padding:0;margin:14px 0 0}
 .pd-name .pill{font-size:.6rem;padding:.12rem .4rem}
 .pd.off{opacity:.45}
 .pd-move{display:flex;gap:6px}
-.mv{width:40px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.05rem;font-weight:800;cursor:pointer}
-.mv:hover:not(:disabled){border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.mv{width:40px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:1.05rem;font-weight:800;cursor:pointer}
+.mv:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
 .mv:disabled{opacity:.3;cursor:default}
 .reordering .pd{padding:4px 0;border-bottom:1px dashed var(--line)}
 .order-help{margin:.6rem 0 0}
@@ -514,7 +514,7 @@ ul.check.flipped li.info{color:var(--ink)}
 .preset b{font-size:1.05rem}.preset span{font-size:.82rem;font-weight:500;opacity:.8;line-height:1.3}
 .small-presets{margin:.4rem 0 .2rem}
 .pd-on{width:20px;height:20px;accent-color:var(--rb-violet);margin:0}
-.pill.sem{background:color-mix(in srgb,var(--rb-orange) 22%,var(--card));color:var(--ink)}
+.pill.sem{background:color-mix(in srgb,var(--rb-orange) 22%,var(--paper));color:var(--ink)}
 .not-mine{margin:.6rem 0 0}
 .sc-filter{margin-top:12px}
 .vid{color:var(--rb-violet);font-weight:600;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;white-space:nowrap}
@@ -522,6 +522,34 @@ ul.check.flipped li.info{color:var(--ink)}
 .vid:hover{color:var(--rb-red)}
 .vid-sec{display:inline-flex;align-items:center;gap:6px;margin:.35rem 0 .2rem;padding:.35rem .7rem;border:1.5px solid currentColor;border-radius:999px;text-decoration:none;font-size:.9rem}
 .vid-sec svg{margin:0}
+
+/* on-screen keyboard */
+.app-kb{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#dcd8e6;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;box-shadow:0 -6px 18px rgba(0,0,0,.08);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.app-kb[hidden]{display:none}
+.app-kb::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--rb-stripe)}
+@media (prefers-color-scheme:dark){.app-kb{background:#0f0d15}}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.kb-k{flex:1 1 0;max-width:46px;height:42px;border:0;border-radius:8px;background:var(--paper);color:var(--ink);font:600 1.15rem system-ui,-apple-system,sans-serif;box-shadow:0 1px 0 rgba(0,0,0,.25);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.kb-k.down{background:color-mix(in srgb,var(--rb-violet) 25%,var(--paper))}
+.kb-row:first-child .kb-k{height:36px;font-size:1rem;background:color-mix(in srgb,var(--paper) 72%,var(--line))}
+.kb-back,.kb-phone{max-width:58px;flex-grow:1.4;font-size:1.1rem}
+.kb-space{max-width:none;flex-grow:4;font-size:.9rem;font-weight:500;color:var(--muted)}
+.kb-enter{max-width:none;flex-grow:2.6;font-size:.9rem;background:var(--rb-violet);color:#fff}
+.kb-enter.down{background:color-mix(in srgb,var(--rb-violet) 75%,#000)}
+body.kb-open{padding-bottom:calc(var(--kbh,250px) + 16px)}
+@media (min-width:700px){.kb-k{max-width:60px;height:46px}.kb-space,.kb-enter{max-width:none}}
+/* settings sheet */
+.set-card{text-align:left;justify-items:stretch;gap:0}
+.set-sec{padding:12px 0;border-bottom:1px solid var(--line)}
+.set-sec:last-child{border-bottom:0}
+.set-sec .lbl{margin:0 0 6px}
+.set-sec .small{margin:.4rem 0 0}
+.set-seg{margin:0;flex-wrap:wrap}
+.set-sec .btn{margin-top:8px}
+.set-seg span{padding:7px 11px;font-size:.92rem}
+header{flex-wrap:wrap;row-gap:10px}
+.brand h1{white-space:nowrap}
+.head-actions{margin-left:auto}
 </style>
 </head>
 <body>
@@ -531,7 +559,7 @@ ul.check.flipped li.info{color:var(--ink)}
       <h1><span class="cross" aria-hidden="true">+</span>Drug Bag</h1>
       <p>Every EMT medicine in the NZ CPGs</p>
     </div>
-    <div class="head-actions"><button class="music-btn" id="musicBtn" aria-pressed="true" aria-label="Lobby music" title="Music"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button><div class="streak" id="streak" role="status"></div></div>
+    <div class="head-actions"><button class="music-btn" id="settingsBtn" aria-label="Settings" title="Settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button><button class="music-btn" id="musicBtn" aria-pressed="true" aria-label="Lobby music" title="Music"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button><div class="streak" id="streak" role="status"></div></div>
   </header>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e8384f"/><stop offset=".55" stop-color="#f28c28"/><stop offset="1" stop-color="#f5c400"/></linearGradient></defs></svg>
   <nav aria-label="Modes">
@@ -564,6 +592,9 @@ ul.check.flipped li.info{color:var(--ink)}
   <div class="share-face score-face" id="scoreFace"><div class="sc-host"><img id="scoreHost" alt=""></div><p class="sc-kicker">Drug Bag · EMT medicines</p><p class="sc-game" id="scoreGame"></p><p class="sc-big" id="scoreNum">0</p><p class="sc-unit" id="scoreUnit"></p>
   <div class="sc-chips"><span class="sc-chip" id="scoreLec"></span><span class="sc-chip" id="scoreCap"></span></div><p class="sc-best" id="scoreBest"></p><span class="sc-new" id="scoreNew" hidden>New personal best!</span><p class="sc-date" id="scoreDate"></p></div>
   <p class="sc-tip">Take a screenshot to show your friends.</p><button class="btn primary" id="scoreDone">Done</button></div></div>
+<div class="levelup" id="settingsSheet" hidden><div class="lu-card sheet-card set-card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="sheet-head"><h2 id="setTitle">Settings</h2><button class="link" id="setClose">Close</button></div>
+  <div id="setBody"></div></div></div>
 <div class="levelup" id="progressSheet" hidden><div class="lu-card sheet-card" role="dialog" aria-modal="true" aria-labelledby="progTitle">
   <div class="sheet-head"><h2 id="progTitle">Your progress</h2><button class="link" id="progClose">Close</button></div>
   <p class="lbl">Levels</p><ol class="rank-levels" id="rankList"></ol>
@@ -2029,13 +2060,6 @@ function initFlashcards() {
         <div class="chips" id="fc-secs">${SECTIONS.map(([k, l]) => `<label class="chip"><input type="checkbox" value="${k}" ${["contra", "dose", "indications"].includes(k) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>
         <button class="btn" id="fc-start">Start practice deck</button>
       </div>
-      <details class="card settings"><summary>Review settings</summary>
-        <div class="picker-head"><span class="lbl">New cards a day (7 cards = one drug)</span></div>
-        <div class="chips" id="rv-new">${[0, 7, 14, 21].map(v => `<label class="chip"><input type="radio" name="rvnew" value="${v}" ${v === perDay ? "checked" : ""}><span>${v ? v + ` (${v / 7} drug${v > 7 ? "s" : ""})` : "None"}</span></label>`).join("")}</div>
-        <p class="small">Each drug has 7 cards: indications, contraindications, cautions, dose and route, mechanism, onset and duration, and key points. Good pushes a card further away each time (1, 3, then about 7, 18, 45 days…). Hard brings it back sooner. Again brings it back later in the session and tomorrow. Progress is saved in this browser on this device.</p>
-        <div class="row"><button class="link danger" id="rv-reset">Reset review progress</button><span id="rv-confirm" hidden>Are you sure? <button class="btn small-btn" id="rv-yes">Yes, reset</button> <button class="link" id="rv-no">Cancel</button></span></div>
-        <p class="small">Clears your review schedule, medals and level on this device. Your streak stays.</p>
-      </details>
     </div>
     <div id="fc-play" hidden></div>
     <div class="row center" id="fc-stop" hidden><button class="link" id="fc-stop-btn">← Stop for now</button></div>`;
@@ -2070,12 +2094,6 @@ function initFlashcards() {
     $("[data-secs-none]", root).onclick = () => $$("#fc-secs input").forEach(i => i.checked = false);
     $("#fc-start").onclick = () => practice(getDrugs(), $$("#fc-secs input:checked").map(i => i.value));
     // settings
-    $("#rv-new").onchange = e => { store.set("rv-new2", +e.target.value); menu(); };
-    $("#rv-reset").onclick = () => { $("#rv-confirm").hidden = false; };
-    $("#rv-no").onclick = () => { $("#rv-confirm").hidden = true; };
-    $("#rv-yes").onclick = () => { store.set("cards", {}); store.set("today", { d: dayStr(), reviewed: 0, newDone: 0 }); store.set("medals", {}); store.set("level", 0); toast("Review progress reset."); menu(); };
-    if (store.get("rv-settings-open", false)) $(".settings", root).open = true;
-    $(".settings", root).ontoggle = e => store.set("rv-settings-open", e.target.open);
   };
   const playArea = () => { $(".setup", root).hidden = true; const p = $("#fc-play"); p.hidden = false; return p; };
   const review = more => {
@@ -2133,6 +2151,7 @@ function initFlashcards() {
   };
   root._menu = menu;
   root._review = review;
+  root._editDrugs = () => { reorder = true; menu(); const o = $(".ordered", root); if (o) o.scrollIntoView({ block: "start" }); };
   menu();
 }
 
@@ -2308,20 +2327,13 @@ function initReview() {
         <button class="game-tile" data-game="clock" style="--c:var(--rb-blue)"><span class="gt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2v3a5 5 0 0 0 10 0V2M7 22v-3a5 5 0 0 1 10 0v3"/></svg></span><span class="big">Beat the clock</span><span class="small">Most answers in 2–5 min</span></button>
         <button class="game-tile" data-game="hot" style="--c:var(--rb-pink)"><span class="gt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 20c0-2.6 1.4-4.6 3.5-4.6S21 17.4 21 20"/></svg></span><span class="big">Hot Seat</span><span class="small">Group game for class</span></button>
       </div>
-      <button class="card fc-link" id="rv-drugs-link"><span class="lbl">Your drugs</span><span class="small">See your progress for each drug, and choose which drugs you learn and in what order</span><span class="ps-more">Flashcards</span></button>
-      <details class="card settings"><summary>Settings</summary>
-        <div class="picker-head"><span class="lbl">Daily goal (correct answers)</span></div>
-        <div class="chips" id="rv-goal">${[5, 10, 20, 30].map(v => `<label class="chip"><input type="radio" name="rvgoal" value="${v}" ${v === daily.goal ? "checked" : ""}><span>${v}</span></label>`).join("")}</div>
-        <p class="small">Review settings (new cards a day, which drugs, learning order, reset) are in Flashcards.</p>
-      </details>`;
+      <button class="card fc-link" id="rv-drugs-link"><span class="lbl">Your drugs</span><span class="small">See your progress for each drug, and choose which drugs you learn and in what order</span><span class="ps-more">Flashcards</span></button>`;
+
     const sb = $("#rv-start"); if (sb) sb.onclick = () => openFlashReview(false);
     const mb = $("#rv-more"); if (mb) mb.onclick = () => openFlashReview(true);
     $("#rv-drugs-link").onclick = () => { location.hash = "flashcards"; show("flashcards"); };
     $("#rv-progress").onclick = openProgress;
     $$("[data-game]", root).forEach(b => b.onclick = () => openGame(b.dataset.game));
-    $("#rv-goal").onchange = e => { daily.goal = +e.target.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); home(); };
-    if (store.get("home-settings-open", false)) $(".settings", root).open = true;
-    $(".settings", root).ontoggle = e => store.set("home-settings-open", e.target.open);
   };
   const run = qs => {
     root.innerHTML = `<div id="rv-play"></div><div class="row center"><button class="link" id="rv-quit">← Stop for now</button></div>`;
@@ -2453,6 +2465,7 @@ const VIEWS = ["review", "flashcards", "quiz", "scenarios", "reference", "games"
 function show(v) {
   if (!VIEWS.includes(v)) v = "review";
   if (v !== "games" && typeof ksStopAll === "function") ksStopAll();
+  if (typeof kbHide === "function") kbHide();
   VIEWS.forEach(x => { $("#" + x).hidden = x !== v; });
   if (typeof refreshLobby === "function" && v !== "games") refreshLobby();
   if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home();
@@ -2464,7 +2477,7 @@ function show(v) {
 }
 document.addEventListener("DOMContentLoaded", () => {
   initOverlays(); initMusic(); initHotSeat();
-  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); renderStreak(); watchLobby();
+  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); renderStreak(); watchLobby();
   $$("nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.v; show(b.dataset.v); });
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== "games") show(h); });
   show(location.hash.slice(1) === "games" ? "review" : location.hash.slice(1));
@@ -3400,6 +3413,127 @@ function initHotSeat() {
 
 function goHome() { ksStopAll(); location.hash = "review"; show("review"); }
 document.addEventListener("visibilitychange", () => { if (document.hidden) ksStopAnim(); else if ($("#ksMonitor") && !$("#games").hidden) ksStartAnim(); });
+
+/* =============== ON-SCREEN KEYBOARD (phones) =============== */
+// On touch screens the app shows its own compact keyboard instead of the phone's, so the
+// question and buttons stay visible. inputmode="none" keeps the phone keyboard away while
+// the field keeps its cursor. Students can switch back to the phone keyboard in Settings.
+const KB = { on: false, field: null, el: null, rep: null };
+const KB_ROWS = [
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+  ["z", "x", "c", "v", "b", "n", "m", "back"],
+  ["phone", ".", ",", ":", "/", "-", "space", "enter"]
+];
+const kbTouch = () => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } };
+const kbMode = () => store.get("kb-mode", kbTouch() ? "app" : "phone");
+const isKbField = el => !!el && el.matches && el.matches('input[type="text"], input[type="search"], textarea');
+function kbApply(root = document) {
+  const fields = root.matches && isKbField(root) ? [root] : $$('input[type="text"], input[type="search"], textarea', root);
+  fields.forEach(f => { if (KB.on) f.setAttribute("inputmode", "none"); else if (f.getAttribute("inputmode") === "none") f.removeAttribute("inputmode"); });
+}
+function kbBuild() {
+  const el = document.createElement("div");
+  el.id = "appKb"; el.className = "app-kb"; el.hidden = true; el.setAttribute("role", "group"); el.setAttribute("aria-label", "On-screen keyboard");
+  el.innerHTML = KB_ROWS.map(r => `<div class="kb-row">${r.map(k => {
+    const lab = { back: "⌫", space: "space", enter: "Enter ↵", phone: "⌨︎" }[k] || k;
+    const aria = { back: "Delete", space: "Space", enter: "Enter", phone: "Use my phone's keyboard" }[k] || k;
+    return `<button type="button" class="kb-k ${k.length > 1 ? "kb-" + k : ""}" data-k="${k}" aria-label="${aria}" tabindex="-1">${lab}</button>`;
+  }).join("")}</div>`).join("");
+  document.body.appendChild(el);
+  el.addEventListener("pointerdown", e => {
+    const b = e.target.closest(".kb-k"); e.preventDefault(); if (!b) return;
+    b.classList.add("down");
+    const k = b.dataset.k; kbPress(k);
+    if (k === "back") { clearTimeout(KB.rep); KB.rep = setTimeout(function again() { kbPress("back"); KB.rep = setTimeout(again, 60); }, 400); }
+  });
+  const up = () => { clearTimeout(KB.rep); $$(".kb-k.down", el).forEach(b => b.classList.remove("down")); };
+  ["pointerup", "pointercancel", "pointerleave"].forEach(t => el.addEventListener(t, up));
+  el.addEventListener("click", e => e.preventDefault());
+  KB.el = el;
+}
+function kbPress(k) {
+  const f = KB.field;
+  if (!f || !document.body.contains(f) || f.disabled) return kbHide();
+  if (k === "phone") return kbSwitch("phone", true);
+  if (k === "enter") { f.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: f.tagName === "TEXTAREA", bubbles: true, cancelable: true })); return; }
+  if (f.readOnly) return;
+  const len = f.value.length;
+  let s = f.selectionStart, en = f.selectionEnd;
+  if (s == null) { s = en = len; }
+  if (k === "back") { if (s !== en) f.setRangeText("", s, en, "end"); else if (s > 0) f.setRangeText("", s - 1, s, "end"); else return; }
+  else f.setRangeText(k === "space" ? " " : k, s, en, "end");
+  f.dispatchEvent(new Event("input", { bubbles: true }));
+}
+function kbShow(f) {
+  KB.field = f;
+  const ret = $('.kb-enter', KB.el); ret.textContent = f.tagName === "TEXTAREA" ? "Check ↵" : "Enter ↵";
+  if (KB.el.hidden) { KB.el.hidden = false; document.body.classList.add("kb-open"); }
+  document.documentElement.style.setProperty("--kbh", KB.el.offsetHeight + "px");
+  requestAnimationFrame(() => {
+    const r = f.getBoundingClientRect(); const room = innerHeight - KB.el.offsetHeight;
+    if (r.bottom + 150 > room || r.top < 60) window.scrollBy({ top: r.top - Math.max(70, room - r.height - 170), behavior: "smooth" });
+  });
+}
+function kbHide() {
+  if (!KB.el || KB.el.hidden) return;
+  KB.el.hidden = true; document.body.classList.remove("kb-open"); KB.field = null; clearTimeout(KB.rep);
+}
+function kbSwitch(mode, refocus) {
+  store.set("kb-mode", mode); KB.on = mode === "app";
+  const f = KB.field; kbApply(); kbHide();
+  if (refocus && f) { f.blur(); f.focus(); toast(mode === "app" ? "Using the app keyboard." : "Using your phone's keyboard. You can switch back in Settings on Home."); }
+}
+function initKeyboard() {
+  kbBuild();
+  KB.on = kbMode() === "app";
+  kbApply();
+  new MutationObserver(ms => { if (!KB.on) return; ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) kbApply(n); })); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("focusin", e => { if (KB.on && isKbField(e.target) && !e.target.readOnly) kbShow(e.target); });
+  document.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if (!(KB.on && isKbField(a) && !a.readOnly)) kbHide(); else if (a !== KB.field) kbShow(a); }, 30));
+  // a physical keyboard press means they don't need the on-screen one right now
+  document.addEventListener("keydown", e => { if (e.isTrusted && KB.field && e.key.length === 1) kbHide(); }, true);
+}
+
+/* =============== SETTINGS (gear button in the header) =============== */
+function openSettings() {
+  const perDay = store.get("rv-new2", 7); const mine = myDrugs();
+  const seg = (name, cur, opts) => `<div class="seg-row set-seg">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${String(v) === String(cur) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
+  $("#setBody").innerHTML = `
+    <div class="set-sec"><p class="lbl">Keyboard for typed answers</p>
+      ${seg("setkb", kbMode(), [["app", "App keyboard"], ["phone", "Phone keyboard"]])}
+      <p class="small">The app keyboard is smaller, so the question stays on screen while you type.</p></div>
+    <div class="set-sec"><p class="lbl">Flashcard answers</p>
+      ${seg("setfc", store.get("fc-mode", "flip"), [["flip", "Flip the card"], ["type", "Type my answer"]])}</div>
+    <div class="set-sec"><p class="lbl">Daily goal (correct answers)</p>
+      ${seg("setgoal", daily.goal, [5, 10, 20, 30].map(v => [v, v]))}</div>
+    <div class="set-sec"><p class="lbl">New review cards a day (7 cards = one drug)</p>
+      ${seg("setnew", perDay, [[0, "None"], [7, "7"], [14, "14"], [21, "21"]])}</div>
+    <div class="set-sec"><p class="lbl">My drugs</p>
+      <p class="small">${mine.length === DRUGS.length ? "All 13 drugs" : mine.length ? mine.map(id => esc(shortName(byId(id)))).join(", ") : "None chosen yet"}</p>
+      <button class="btn small-btn" id="setDrugs">Choose drugs and order</button></div>
+    <div class="set-sec set-danger">
+      <div class="row"><button class="link danger" id="setReset">Reset review progress</button><span id="setConfirm" hidden>Are you sure? <button class="btn small-btn" id="setYes">Yes, reset</button> <button class="link" id="setNo">Cancel</button></span></div>
+      <p class="small">Clears your review schedule, medals and level on this device. Your streak stays. Progress is saved in this browser only.</p></div>`;
+  const refresh = () => { const v = currentView(); if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home(); if (v === "flashcards" && $("#flashcards")._menu && !$(".setup", $("#flashcards")).hidden) $("#flashcards")._menu(); };
+  $$('input[name="setkb"]').forEach(i => i.onchange = () => { kbSwitch(i.value, false); toast(i.value === "app" ? "Typed answers will use the app keyboard." : "Typed answers will use your phone's keyboard."); });
+  $$('input[name="setfc"]').forEach(i => i.onchange = () => { store.set("fc-mode", i.value); refresh(); });
+  $$('input[name="setgoal"]').forEach(i => i.onchange = () => { daily.goal = +i.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); refresh(); });
+  $$('input[name="setnew"]').forEach(i => i.onchange = () => { store.set("rv-new2", +i.value); refresh(); });
+  $("#setDrugs").onclick = () => { closeSettings(); store.set("drugs-chosen", true); location.hash = "flashcards"; show("flashcards"); $("#flashcards")._editDrugs(); };
+  $("#setReset").onclick = () => { $("#setConfirm").hidden = false; };
+  $("#setNo").onclick = () => { $("#setConfirm").hidden = true; };
+  $("#setYes").onclick = () => { store.set("cards", {}); store.set("today", { d: dayStr(), reviewed: 0, newDone: 0 }); store.set("medals", {}); store.set("level", 0); $("#setConfirm").hidden = true; toast("Review progress reset."); refresh(); };
+  $("#settingsSheet").hidden = false; $("#setClose").focus();
+}
+function closeSettings() { $("#settingsSheet").hidden = true; }
+function initSettings() {
+  $("#settingsBtn").onclick = openSettings;
+  $("#setClose").onclick = closeSettings;
+  $("#settingsSheet").addEventListener("click", e => { if (e.target.id === "settingsSheet") closeSettings(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+}
 
 </script>
 </body>
