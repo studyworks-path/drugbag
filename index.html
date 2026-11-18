@@ -559,6 +559,14 @@ body.kb-open{padding-bottom:calc(var(--kbh,250px) + 16px)}
 header{flex-wrap:wrap;row-gap:10px}
 .brand h1{white-space:nowrap}
 .head-actions{margin-left:auto}
+.help-btn{font:800 1.15rem "Bricolage Grotesque",sans-serif}
+.help-card p{margin:.35rem 0;line-height:1.45}
+.help-rates{border-collapse:collapse;width:100%;margin:.4rem 0;font-size:.92rem}
+.help-rates th{text-align:left;padding:5px 10px 5px 0;vertical-align:top;white-space:nowrap}
+.help-rates td{padding:5px 0;border-bottom:1px solid var(--line)}
+.help-rates tr:last-child td{border-bottom:0}
+.help-link{display:block;margin:.6rem auto 0}
+.pill.para{background:color-mix(in srgb,var(--rb-blue) 22%,var(--paper));color:var(--ink)}
 </style>
 </head>
 <body>
@@ -568,7 +576,7 @@ header{flex-wrap:wrap;row-gap:10px}
       <h1><span class="cross" aria-hidden="true">+</span>Drug Bag</h1>
       <p>Every EMT medicine in the NZ CPGs</p>
     </div>
-    <div class="head-actions"><button class="music-btn" id="settingsBtn" aria-label="Settings" title="Settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button><button class="music-btn" id="musicBtn" aria-pressed="true" aria-label="Lobby music" title="Music"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button><div class="streak" id="streak" role="status"></div></div>
+    <div class="head-actions"><button class="music-btn help-btn" id="helpBtn" aria-label="How Drug Bag works" title="How it works" aria-haspopup="dialog">?</button><button class="music-btn" id="settingsBtn" aria-label="Settings" title="Settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button><button class="music-btn" id="musicBtn" aria-pressed="true" aria-label="Lobby music" title="Music"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button><div class="streak" id="streak" role="status"></div></div>
   </header>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e8384f"/><stop offset=".55" stop-color="#f28c28"/><stop offset="1" stop-color="#f5c400"/></linearGradient></defs></svg>
   <nav aria-label="Modes">
@@ -601,6 +609,9 @@ header{flex-wrap:wrap;row-gap:10px}
   <div class="share-face score-face" id="scoreFace"><div class="sc-host"><img id="scoreHost" alt=""></div><p class="sc-kicker">Drug Bag · EMT medicines</p><p class="sc-game" id="scoreGame"></p><p class="sc-big" id="scoreNum">0</p><p class="sc-unit" id="scoreUnit"></p>
   <div class="sc-chips"><span class="sc-chip" id="scoreLec"></span><span class="sc-chip" id="scoreCap"></span></div><p class="sc-best" id="scoreBest"></p><span class="sc-new" id="scoreNew" hidden>New personal best!</span><p class="sc-date" id="scoreDate"></p></div>
   <p class="sc-tip">Take a screenshot to show your friends.</p><button class="btn primary" id="scoreDone">Done</button></div></div>
+<div class="levelup" id="helpSheet" hidden><div class="lu-card sheet-card set-card help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="sheet-head"><h2 id="helpTitle">How Drug Bag works</h2><button class="link" id="helpClose">Close</button></div>
+  <div id="helpBody"></div></div></div>
 <div class="levelup" id="settingsSheet" hidden><div class="lu-card sheet-card set-card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
   <div class="sheet-head"><h2 id="setTitle">Settings</h2><button class="link" id="setClose">Close</button></div>
   <div id="setBody"></div></div></div>
@@ -649,7 +660,7 @@ const NONE = [it("None", "^\\s*(none|nil|no\\b|n/?a)", "\\bnone\\b", "\\bnil\\b"
 const ALLERGY = it("Known severe allergy", "allerg", "anaphyla", "hypersens");
 const BREASTFEED = "May be administered if the patient is breastfeeding. Advise the patient to stop breastfeeding and seek further advice from their lead maternity carer or GP.";
 
-const DRUGS = [
+const EMT_DRUGS = [
   /* ------------------------------------------------------------------ */
   {
     id: "adrenaline",
@@ -1761,6 +1772,1071 @@ const SECTION_VIDEOS = [
   { drug: "glucagon", section: "moa", title: "Watch: hormonal regulation of blood glucose", url: "https://youtu.be/S1H5VQGQLgo" },
 ];
 
+/* =====================================================================
+   DRUG BAG — PARAMEDIC-scope medicines (CPG EAS 1.1, Paramedic column)
+   Source: NZ CPGs (EAS), exported 24 Sept 2026, monographs CPG EAS 14.x.
+   Only the routes and indications authorised for Paramedics are included
+   (e.g. amiodarone: cardiac arrest only; ketamine: analgesia only).
+   Every entry has scope: "para". These only appear when the student's
+   practice level is Paramedic (Year 3).
+   ===================================================================== */
+const PARA_DRUGS = [
+  /* ------------------------------------------------------------------ */
+  {
+    id: "amiodarone", scope: "para",
+    name: "Amiodarone",
+    aliases: ["amiodarone", "cordarone"],
+    ref: "EAS 14.4",
+    src: "current",
+    routes: [it("IV (cardiac arrest only)", "\\biv\\b", "intraven")],
+    moa: [
+      "Amiodarone is an antidysrhythmic with a broad spectrum of activity, predominantly class III.",
+      "It prolongs the action potential duration, reduces automaticity and prolongs the refractory period of atrial, nodal and ventricular tissues.",
+      "This reduces abnormal electrical activity (for example ectopy) and electrical conduction, reduces heart rate and stabilises the SA and AV nodes."
+    ],
+    moaKeys: ["class (iii|3)|antidysrhythm|antiarrhythm|refractory|action potential"],
+    indications: [it("Cardiac arrest with VF or VT after three shocks", "\\bvf\\b|\\bvt\\b|ventric", "three|3")],
+    indNeed: 1,
+    contra: [
+      ALLERGY,
+      it("Known severe allergy to iodine", "iodine"),
+      it("VT secondary to cyclic antidepressant poisoning (can severely worsen shock without resolving the rhythm)", "tricyclic|cyclic|tca|antidepress"),
+      it("Torsades de pointes is present or has occurred", "torsade")
+    ],
+    cautions: [
+      it("None if the patient is in cardiac arrest (except tricyclic poisoning or torsades de pointes, see contraindications)", "none|nil|arrest"),
+    ],
+    pregnancy: "May cause harm during pregnancy. Do not administer amiodarone unless there is a strong clinical indication. " + BREASTFEED,
+    doses: [
+      { label: "Cardiac arrest", text: "300 mg for an adult. If in VF or VT after six shocks, a second dose of 150 mg may be administered. See the paediatric drug dose tables for a child.",
+        q: "What is the first dose of amiodarone in cardiac arrest (adult)?", ans: [[300, "mg"]] },
+      { label: "Second dose", qOnly: true, text: "150 mg if still in VF or VT after six shocks.",
+        q: "If still in VF or VT after six shocks, what second dose of amiodarone may be given?", ans: [[150, "mg"]] }
+    ],
+    admin: ["Cardiac arrest: administer IV undiluted as a bolus."],
+    adverse: "Hypotension, lightheadedness, bradydysrhythmia.",
+    onset: "5–10 minutes",
+    duration: "1–4 hours after a single dose",
+    onsetQ: { q: "What is the usual onset of amiodarone?", nums: [5, 10], unit: "min" },
+    prep: "Ampoule containing 150 mg in 3 ml.",
+    keyPoints: [
+      "Paramedics give amiodarone in cardiac arrest only. Tachydysrhythmias are ICP and CCP scope.",
+      "Contraindicated in VT from cyclic antidepressant poisoning and in torsades de pointes.",
+      "Avoid shaking the ampoule: it makes the solution froth.",
+      "When diluted with 0.9% sodium chloride the solution goes slightly cloudy. This does not affect the amiodarone."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "cefazolin", scope: "para",
+    name: "Cefazolin",
+    aliases: ["cefazolin", "cephazolin", "kefzol"],
+    ref: "EAS 14.49",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven")],
+    moa: ["Cefazolin is a first-generation cephalosporin antibiotic with activity against gram-negative and gram-positive bacteria. It inhibits production of the bacterial cell wall, causing bacteria to die."],
+    moaKeys: ["cell wall|cephalosporin"],
+    indications: [
+      it("Sepsis where the source appears to be soft tissue or a joint, aged ≥ 12 years, one or more clinical features indicating antibiotics, and time to hospital > 30 minutes", "sepsis|septic"),
+      it("Compound fracture", "compound|open fracture"),
+      it("Large contaminated wound", "wound|contaminat"),
+      it("Following chest decompression", "decompress|chest"),
+      it("Following amputation", "amputat"),
+      it("Cellulitis (a single dose if not being referred or transported)", "cellulitis")
+    ],
+    indNeed: 4,
+    contra: [it("Known severe allergy to cephalosporins", "allerg|anaphyla|hypersens")],
+    cautions: NONE,
+    pregnancy: "Safe and should be administered if indicated.",
+    doses: [{ label: "Dose", text: "1 g IV for an adult. See the paediatric drug dose tables for a child.", q: "What is the adult dose of cefazolin?", ans: [[1, "g"]] }],
+    admin: [
+      "Add approximately 4 ml of 0.9% sodium chloride to a 1 g ampoule and shake until dissolved.",
+      "Draw up and dilute to a total of 10 ml.",
+      "Administer IV over 1–2 minutes, preferably into a running line."
+    ],
+    adverse: "None.",
+    onset: "30–60 minutes",
+    duration: "6–8 hours",
+    onsetQ: { q: "What is the usual duration of effect of cefazolin?", nums: [6, 8], unit: "hour" },
+    prep: "Ampoule containing 1 g of cefazolin as a powder for reconstitution.",
+    keyPoints: [
+      "Rapid administration can cause pain and phlebitis, so give it into a running line where possible.",
+      "Kidney impairment prolongs clearance but does not change the initial (loading) dose.",
+      "Safe in pregnancy and should be given if indicated."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "ceftriaxone", scope: "para",
+    name: "Ceftriaxone",
+    aliases: ["ceftriaxone", "rocephin"],
+    ref: "EAS 14.9",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IM (meningococcal septicaemia, if IV access cannot be immediately obtained)", "\\bim\\b", "intramusc")],
+    moa: ["Ceftriaxone is a cephalosporin antibiotic with broad activity against gram-negative and gram-positive bacteria. It inhibits production of the bacterial cell wall, causing bacteria to die."],
+    moaKeys: ["cell wall|cephalosporin"],
+    indications: [
+      it("Suspected meningococcal septicaemia", "mening"),
+      it("Sepsis where cefazolin is not indicated, aged ≥ 12 years, one or more clinical features indicating antibiotics, and time to hospital > 30 minutes", "sepsis|septic")
+    ],
+    indNeed: 2,
+    contra: [it("Anaphylaxis to cephalosporins", "allerg|anaphyla|hypersens")],
+    cautions: NONE,
+    pregnancy: "Safe and should be administered if indicated.",
+    doses: [
+      { label: "IV", text: "2 g IV for an adult.", q: "What is the adult IV dose of ceftriaxone?", ans: [[2, "g"]] },
+      { label: "IM", text: "2 g IM for an adult if IV access cannot be immediately obtained (meningococcal septicaemia only). See the paediatric drug dose tables for a child." }
+    ],
+    admin: [
+      "IV: add approximately 4 ml of 0.9% sodium chloride to a 2 g ampoule, shake until dissolved, dilute to 10 ml and administer over 1–2 minutes, preferably into a running line.",
+      "IM: add 4 ml of 0.9% sodium chloride, draw up into two syringes (about half in each, total 5 ml) and give one into each lateral thigh. If not suitable, use each lateral upper arm."
+    ],
+    adverse: "None.",
+    onset: "30–60 minutes",
+    duration: "24 hours",
+    onsetQ: { q: "What is the usual duration of effect of ceftriaxone?", nums: [24], unit: "hour" },
+    prep: "Ampoule containing 2 g of ceftriaxone as a powder for reconstitution.",
+    keyPoints: [
+      "Dissolve in 0.9% sodium chloride, not lignocaine, for IM use in suspected meningococcal septicaemia.",
+      "As meningococcal bacteria die they release endotoxins, which can cause profound worsening of shock. Be ready to treat with 0.9% sodium chloride IV, and metaraminol or adrenaline IV.",
+      "The IM dose is split between both lateral thighs."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "clopidogrel", scope: "para",
+    name: "Clopidogrel",
+    aliases: ["clopidogrel", "plavix"],
+    ref: "EAS 14.10",
+    src: "current",
+    routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
+    moa: [
+      "Clopidogrel has antiplatelet activity.",
+      "It blocks the binding of adenosine diphosphate (ADP) to platelets and impairs platelet function. It provides significantly more antiplatelet activity than aspirin."
+    ],
+    moaKeys: ["platelet|adp"],
+    indications: [it("STEMI in conjunction with fibrinolytic therapy", "stemi|fibrinoly|thrombolys|tenecteplase")],
+    indNeed: 1,
+    contra: [ALLERGY],
+    cautions: [
+      it("Clinically significant bleeding (clopidogrel will increase bleeding)", "bleed"),
+      it("At risk of bleeding: if any cautions are present in the fibrinolytic therapy checklist, seek clinical advice", "risk|checklist|advice"),
+      it("Pregnancy", "pregnan")
+    ],
+    pregnancy: "Safety has not been demonstrated during pregnancy. The likelihood of STEMI in a pregnant woman is so low that personnel must seek clinical advice. " + BREASTFEED,
+    doses: [
+      { label: "Aged < 75 years", text: "300 mg.", q: "What is the dose of clopidogrel for a patient aged under 75?", ans: [[300, "mg"]] },
+      { label: "Aged ≥ 75 years", text: "75 mg.", q: "What is the dose of clopidogrel for a patient aged 75 or over?", ans: [[75, "mg"]] }
+    ],
+    admin: ["Administer PO."],
+    adverse: "Increased bleeding.",
+    onset: "30–60 minutes",
+    duration: "3–5 days (platelets exposed to clopidogrel are impaired for their 7–10 day life)",
+    onsetQ: { q: "What is the usual duration of effect of clopidogrel?", nums: [3, 5], unit: "day" },
+    prep: "75 mg tablets.",
+    keyPoints: [
+      "Clopidogrel is a prodrug: it is converted to its active form in the liver.",
+      "Bleeding risk is increased if the patient takes an anticoagulant.",
+      "Given only with fibrinolytic therapy for STEMI."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "droperidol", scope: "para",
+    name: "Droperidol",
+    aliases: ["droperidol", "droleptan"],
+    ref: "EAS 14.11",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc"), it("SC (care during the last days of life)", "\\bsc\\b", "subcut")],
+    moa: ["Droperidol blocks dopamine and alpha receptors centrally, causing sedation, reduced agitation, a state of mental detachment, and an antiemetic action."],
+    moaKeys: ["dopamine"],
+    indications: [
+      it("Aged ≥ 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when olanzapine has not been given or is ineffective", "behav|agitat|abd\\b"),
+      it("Severe pain, usually with an opiate, with chronic opiate use, severe psychological distress, or nausea and/or vomiting", "pain|analges"),
+      it("Nausea and agitation, or pain not responding to an opiate, during the last days of life", "last days|palliat|end of life|dying"),
+      it("Nausea and/or vomiting that persists despite ondansetron, involves motion sickness, or is from cannabinoid hyperemesis syndrome", "nausea|vomit|motion|cannabi"),
+      it("Vertigo", "vertigo"),
+      it("Primary headache that is severe", "headache|migraine")
+    ],
+    indNeed: 4,
+    contra: [
+      ALLERGY,
+      it("Aged less than 12 years", "12"),
+      it("Pregnancy (unless indicated for acute behavioural disturbance)", "pregnan")
+    ],
+    cautions: [
+      it("Altered level of consciousness (effects increased and prolonged)", "conscious|loc\\b|gcs|drows"),
+      it("Parkinson's disease (risk of worsening the movement disorder)", "parkinson"),
+      it("Concurrent ketamine or midazolam (effects increased and prolonged)", "ketamine|midazolam"),
+      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
+      it("Signs of shock (may make shock worse)", "shock|hypotens")
+    ],
+    pregnancy: "Should be administered if indicated for acute behavioural disturbance. For all other indications it is contraindicated in pregnancy or when breastfeeding.",
+    doses: [
+      { label: "Acute behavioural disturbance", text: "10 mg IV/IM for an adult. Consider reducing the dose to 5 mg if a caution is present. The dose may be repeated once after 20 minutes.",
+        q: "What is the adult dose of droperidol for acute behavioural disturbance?", ans: [[10, "mg"]] },
+      { label: "Analgesia", text: "0.625 mg IV/IM for an adult, once only.", q: "What is the adult dose of droperidol as an adjunct to analgesia?", ans: [[0.625, "mg"]] },
+      { label: "Nausea and/or vomiting", text: "0.625 mg IV/IM for an adult, once only." },
+      { label: "Vertigo", text: "1.25 mg IV/IM for an adult, once only. Consider reducing the dose to 0.625 mg IV/IM if a caution is present.", q: "What is the adult dose of droperidol for vertigo?", ans: [[1.25, "mg"]] },
+      { label: "Primary headache that is severe", text: "1.25 mg IV/IM for an adult, once only. Consider reducing the dose to 0.625 mg IV/IM if a caution is present." },
+      { label: "Care during the last days of life", text: "1.25 mg IV or 2.5 mg IM/SC. The dose may be repeated as required." }
+    ],
+    admin: [
+      "IV for acute behavioural disturbance: dilute the dose to 10 ml with 0.9% sodium chloride and give over 1–2 minutes.",
+      "IV for nausea, analgesia, vertigo or headache: dilute 2.5 mg to 4 ml (0.625 mg/ml) and give the dose as an IV bolus.",
+      "IM: undiluted, preferably into the lateral thigh, otherwise the lateral upper arm.",
+      "SC: undiluted into the abdominal wall."
+    ],
+    adverse: "Hypotension, which may occur if a large IV dose is given rapidly.",
+    onset: "IV/IM: 5–10 minutes",
+    duration: "4–6 hours",
+    onsetQ: { q: "What is the usual duration of effect of droperidol?", nums: [4, 6], unit: "hour" },
+    prep: "Ampoule containing 2.5 mg in 1 ml.",
+    keyPoints: [
+      "One or two doses are safe even with a known prolonged QT interval. QT prolongation was reported with repeated or high doses.",
+      "Sedation is increased with alcohol, recreational drugs, olanzapine or midazolam.",
+      "Dyskinesia is unusual after one or two doses."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "enoxaparin", scope: "para",
+    name: "Enoxaparin",
+    aliases: ["enoxaparin", "clexane"],
+    ref: "EAS 14.12",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("SC", "\\bsc\\b", "subcut")],
+    moa: ["Enoxaparin is a low molecular weight heparin (LMWH) anticoagulant. It potentiates antithrombin III, inhibiting multiple coagulation factors, particularly factor Xa."],
+    moaKeys: ["antithrombin|xa\\b|factor|anticoag|heparin"],
+    indications: [it("STEMI in conjunction with fibrinolytic therapy", "stemi|fibrinoly|thrombolys|tenecteplase")],
+    indNeed: 1,
+    contra: [ALLERGY],
+    cautions: [
+      it("Clinically significant bleeding (enoxaparin will increase bleeding)", "bleed"),
+      it("At risk of bleeding: if any cautions are present in the fibrinolytic therapy checklist, seek clinical advice or discuss with the STEMI coordinator", "risk|checklist|advice|coordinator"),
+      it("Pregnancy", "pregnan")
+    ],
+    pregnancy: "Safety has not been demonstrated. Seek clinical advice before administration. " + BREASTFEED,
+    doses: [
+      { label: "IV", text: "30 mg, only if the patient is aged less than 75 years.", q: "What is the IV dose of enoxaparin, and for which patients?", ans: [[30, "mg"]] },
+      { label: "SC, aged < 75 years", text: "<60 kg 60 mg · 60–69 kg 70 mg · 70–79 kg 80 mg · 80–89 kg 90 mg · ≥90 kg 100 mg.", q: "SC enoxaparin for a 72 kg patient aged under 75?", ans: [[80, "mg"]] },
+      { label: "SC, aged ≥ 75 years", text: "<60 kg 45 mg · 60–69 kg 50 mg · 70–79 kg 60 mg · 80–89 kg 70 mg · ≥90 kg 75 mg.", q: "SC enoxaparin for an 82-year-old weighing 65 kg?", ans: [[50, "mg"]] }
+    ],
+    admin: [
+      "IV: dilute 100 mg to 10 ml with 0.9% sodium chloride (10 mg/ml), discard 7 ml and give 30 mg (3 ml) IV.",
+      "SC: into the abdominal wall. Discard unwanted drug from the syringe first. If too much is discarded by mistake, give what remains."
+    ],
+    adverse: "Increased bleeding.",
+    onset: "10–30 minutes",
+    duration: "12–24 hours",
+    onsetQ: { q: "What is the usual duration of effect of enoxaparin?", nums: [12, 24], unit: "hour" },
+    prep: "Pre-filled syringe containing 100 mg in 1 ml.",
+    keyPoints: [
+      "The SC dose is based on age (< 75 or ≥ 75) and known or estimated weight.",
+      "IV enoxaparin is only for patients aged under 75.",
+      "Bleeding risk is increased if the patient takes an anticoagulant."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "fentanyl", scope: "para",
+    name: "Fentanyl",
+    aliases: ["fentanyl", "sublimaze"],
+    ref: "EAS 14.13",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IN", "\\bin\\b", "intranas", "nasal"), it("IM", "\\bim\\b", "intramusc"), it("SC", "\\bsc\\b", "subcut")],
+    moa: ["Fentanyl is an opiate analgesic. It is an opiate agonist that binds to opiate receptors in the brain and spinal cord, causing analgesia."],
+    moaKeys: ["opi(ate|oid)"],
+    indications: [
+      it("Moderate to severe pain", "pain|analges"),
+      it("Cardiogenic pulmonary oedema with severe anxiety", "pulmonary|oedema|edema|anxi"),
+      it("Control of pain, agitation or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
+      it("Autonomic dysreflexia, even if the patient cannot feel pain", "dysreflex")
+    ],
+    indNeed: 3,
+    contra: [ALLERGY],
+    cautions: [
+      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Aged less than one year (increased risk of respiratory depression)", "one year|1 year|infant|under 1"),
+      it("Respiratory depression or at high risk of it, for example severe COPD, morbid obesity or home BiPAP", "respirat|copd|obes|bipap"),
+      it("Labour (opiates cross the placenta and may depress the baby's breathing)", "labour|labor|birth"),
+      it("Concurrent other opiates, ketamine or midazolam", "opi(ate|oid)|ketamine|midazolam"),
+      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
+      it("Signs of shock", "shock|hypotens")
+    ],
+    pregnancy: "Safety has not been demonstrated in pregnancy, but fentanyl should be administered if indicated. " + BREASTFEED,
+    doses: [
+      { label: "IV bolus for analgesia", text: "10–50 mcg every five minutes for an adult, as required. Use a dose at the lower end of the range if the patient is frail or has signs of shock. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IV bolus dose range of fentanyl for analgesia, and how often?", keys: ["10", "50", "5 ?min|five"], kind: "Dose" },
+      { label: "IV infusion", text: "Start at 1 mcg/kg/hour, up to a maximum of 150 mcg/hour. Give additional boluses as required every five minutes and adjust the rate every 15–20 minutes." },
+      { label: "IV for autonomic dysreflexia", text: "20–30 mcg increments to a total of 100 mcg.", q: "Fentanyl IV for autonomic dysreflexia: increments and total?", keys: ["20", "30", "100"], kind: "Dose" },
+      { label: "IN for analgesia", text: "100 mcg for an adult. Halve the dose if frail or signs of shock. Repeat as required every 20 minutes. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IN dose of fentanyl for analgesia?", ans: [[100, "mcg"]] },
+      { label: "IM and SC for analgesia", text: "50–100 mcg IM/SC for an adult. Halve the dose if frail or signs of shock. Repeat as required every 20 minutes, up to a maximum of three doses. See the paediatric drug dose tables for a child." }
+    ],
+    admin: [
+      "IV is the preferred route.",
+      "IV boluses: dilute 100 mcg to 10 ml with 0.9% sodium chloride (10 mcg/ml) for an adult or a child rounded up to 30 kg or more. For a child rounded up to 20 kg or less, dilute 100 mcg in a 100 ml bag of 5% glucose (1 mcg/ml).",
+      "IN: undiluted, half the dose in each of two 1 ml syringes, injected rapidly into each nostril through a mucosal atomiser. Draw up an extra 0.1 ml in the first syringe to fill the dead space.",
+      "IM: undiluted, preferably the lateral thigh, otherwise the lateral upper arm. SC: undiluted into the abdominal wall."
+    ],
+    adverse: "Respiratory depression, bradycardia, hypotension, sedation, nausea and vomiting, itch, euphoria.",
+    onset: "IV: 2–5 minutes (peak analgesia and respiratory depression may take 10–15 minutes). IN, IM and SC: 5–10 minutes",
+    duration: "30–60 minutes (the effect on respiration may last several hours)",
+    onsetQ: { q: "What is the usual duration of effect of fentanyl?", nums: [30, 60], unit: "min" },
+    prep: "Ampoule containing 100 mcg in 2 ml.",
+    keyPoints: [
+      "Fentanyl is usually the preferred opiate for short-term analgesia, renal impairment or signs of shock.",
+      "It is more fat soluble than morphine, which is why it is well absorbed through the nasal mucosa.",
+      "A patient given fentanyl must be clearly recommended transport by ambulance, except under the last days of life, patella dislocation or shoulder dislocation guidelines.",
+      "Effects are increased by other opiates, benzodiazepines and alcohol."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "hydrocortisone", scope: "para",
+    name: "Hydrocortisone",
+    aliases: ["hydrocortisone", "solu-cortef", "solucortef"],
+    ref: "EAS 14.20",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc")],
+    moa: ["Hydrocortisone is a corticosteroid with anti-inflammatory and immunosuppressant actions. It inhibits the production of inflammatory mediators, including prostaglandins and leukotrienes, reducing the inflammatory and immune response."],
+    moaKeys: ["inflam|steroid|immun"],
+    indications: [
+      it("At risk of adrenal crisis or suspected to have adrenal crisis", "adrenal|addison"),
+      it("Severe or immediately life-threatening asthma", "asthma"),
+      it("Severe COPD or imminent respiratory arrest from COPD", "copd")
+    ],
+    indNeed: 3,
+    contra: [ALLERGY],
+    cautions: NONE,
+    pregnancy: "Safety has not been demonstrated, but there is significant clinical experience with steroids, they appear to be safe and hydrocortisone should be administered if indicated. " + BREASTFEED,
+    doses: [{ label: "Dose", text: "100 mg for an adult. See the paediatric drug dose tables for a child.", q: "What is the adult dose of hydrocortisone?", ans: [[100, "mg"]] }],
+    admin: [
+      "Press the plastic cap to force the diluent into the vial, then mix by turning the vial upside down several times. Do not shake it.",
+      "IV: dilute to approximately 10 ml with 0.9% sodium chloride and give over 1–2 minutes.",
+      "IM: do not dilute further. Preferably the lateral thigh, otherwise the lateral upper arm."
+    ],
+    adverse: "Fatigue. Sodium and water retention (usually only significant with repeated or prolonged dosing).",
+    onset: "10–20 minutes",
+    duration: "8–12 hours",
+    onsetQ: { q: "What is the usual onset of hydrocortisone?", nums: [10, 20], unit: "min" },
+    prep: "Two-chamber vial: 100 mg hydrocortisone powder and 2 ml sterile water.",
+    keyPoints: [
+      "Paramedic indications are adrenal crisis, severe asthma and severe COPD. Angioedema during stroke clot retrieval transfers is ICP and CCP scope.",
+      "Do not shake the vial."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "ketamine", scope: "para",
+    name: "Ketamine",
+    aliases: ["ketamine", "ketalar"],
+    ref: "EAS 14.23",
+    src: "current",
+    routes: [it("IV (analgesia only)", "\\biv\\b", "intraven"), it("IM (analgesia, if IV access cannot be obtained)", "\\bim\\b", "intramusc"), it("PO (analgesia, if IM is not feasible)", "\\bpo\\b", "oral")],
+    moa: [
+      "Ketamine is predominantly an N-methyl-d-aspartate (NMDA) receptor antagonist, inhibiting excitatory neurotransmitters in the brain.",
+      "Low doses cause analgesia, larger doses cause amnesia and dissociation, and high doses cause anaesthesia."
+    ],
+    moaKeys: ["nmda"],
+    indications: [it("Severe pain that has not been adequately controlled with an opiate", "pain|analges", "opi(ate|oid)|not controlled|inadequate|despite")],
+    indNeed: 1,
+    contra: [ALLERGY],
+    cautions: [
+      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Signs of shock", "shock|hypotens"),
+      it("Concurrent opiates or midazolam", "opi(ate|oid)|midazolam|fentanyl|morphine"),
+      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
+      it("Aged less than five years", "five|5 ?y|under 5")
+    ],
+    pregnancy: "Safety has not been demonstrated during pregnancy, but ketamine should be administered if indicated. " + BREASTFEED,
+    doses: [
+      { label: "IV for analgesia", text: "0.2 mg/kg IV up to a maximum of 20 mg for an adult, administered over approximately 15 minutes. Repeat as required. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IV dose of ketamine for analgesia (per kg and maximum)?", keys: ["0\\.2", "20"], kind: "Dose" },
+      { label: "IM or PO for analgesia", text: "0.5 mg/kg IM or PO for an adult, up to a maximum of 50 mg, if IV access cannot be obtained. May be repeated once after 20 minutes. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IM dose of ketamine for analgesia (per kg and maximum)?", keys: ["0\\.5", "50"], kind: "Dose" },
+      { label: "Weight", qOnly: true, text: "Round the patient's weight up to the nearest 10 kg when calculating doses.", q: "When calculating ketamine doses, how do you round the patient's weight?", keys: ["up", "10"], kind: "Dose" }
+    ],
+    admin: [
+      "IV is preferred. Give analgesia doses over approximately 15 minutes, which appears to reduce adverse effects.",
+      "Dilute 100 mg (1 ml) in a 100 ml bag of 5% glucose and label. Adult: give 2 mg (2 ml) every 1–2 minutes. Child: dilute the dose further to 20 ml with 0.9% sodium chloride and give 2 ml every 1–2 minutes.",
+      "IM is preferred over PO (more reliable absorption): undiluted, preferably the lateral thigh.",
+      "PO only when IM is contraindicated or not feasible: undiluted in a liquid, for example paracetamol syrup or water."
+    ],
+    adverse: "Transient hypertension, tachycardia, apnoea, nausea and vomiting, sedation, hallucinations.",
+    onset: "IV: 1–2 minutes. IM: 5–10 minutes. PO: 10–20 minutes",
+    duration: "10–60 minutes",
+    onsetQ: { q: "What is the usual onset of IV ketamine?", nums: [1, 2], unit: "min" },
+    prep: "Ampoule containing 200 mg in 2 ml.",
+    keyPoints: [
+      "Paramedics give ketamine for analgesia only. Dissociation, behavioural disturbance, RSI and the other indications are ICP and CCP scope.",
+      "Give enough opiate first that further doses add no more analgesia, usually 150–200 mcg fentanyl or 15–20 mg morphine for an adult.",
+      "Warn the patient they may feel strange.",
+      "Don't routinely treat hallucinations with midazolam. Most settle with explanation and time.",
+      "Round the weight up to the nearest 10 kg when calculating doses."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "levetiracetam", scope: "para",
+    name: "Levetiracetam",
+    aliases: ["levetiracetam", "keppra"],
+    ref: "EAS 14.51",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven")],
+    moa: ["Levetiracetam is an anticonvulsant. It is thought to inhibit seizure activity by blocking some calcium channels and binding synaptic proteins to modulate neurotransmitter release."],
+    moaKeys: ["anticonvuls|calcium|synap|seizure"],
+    indications: [
+      it("Seizure that continues or recurs after two doses of parenteral midazolam", "midazolam|two doses|2 doses|continu|recur"),
+      it("Seizure activity associated with severe TBI, even if it has stopped after midazolam", "tbi|head injur|brain injur")
+    ],
+    indNeed: 2,
+    contra: [ALLERGY],
+    cautions: NONE,
+    pregnancy: "Safe and should be administered if indicated.",
+    doses: [{ label: "Dose", text: "2 g IV for an adult. May be repeated once if the seizure continues or recurs ten minutes after the first dose. See the paediatric drug dose tables for a child (once only).",
+      q: "What is the adult dose of levetiracetam?", ans: [[2, "g"]] }],
+    admin: ["Draw up the required dose and administer IV over 5 minutes, preferably into a running line.", "Do not administer IM."],
+    adverse: "None.",
+    onset: "10 minutes",
+    duration: "6–8 hours",
+    onsetQ: { q: "What is the usual onset of levetiracetam?", nums: [10], unit: "min" },
+    prep: "Ampoule containing 500 mg in 5 ml.",
+    keyPoints: [
+      "Given after two doses of parenteral midazolam have failed, or for seizures with severe TBI.",
+      "Adults may have a second dose after ten minutes. Children get one dose only.",
+      "IV only. Never IM."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "lignocaine", scope: "para",
+    name: "Lignocaine 1%",
+    aliases: ["lignocaine", "lignocaine 1%", "1% lignocaine", "lidocaine", "xylocaine"],
+    ref: "EAS 14.25",
+    src: "current",
+    routes: [it("SC", "\\bsc\\b", "subcut"), it("IO", "\\bio\\b", "intraoss")],
+    moa: ["Lignocaine is a local anaesthetic. It blocks the initiation and transmission of nerve impulses by blocking the movement of sodium ions across the nerve cell membrane."],
+    moaKeys: ["sodium|local anaes"],
+    indications: [
+      it("SC for prophylaxis of pain from IV cannulation", "cannula|\\biv\\b"),
+      it("SC for digital ring blocks for analgesia", "ring block|digit|finger"),
+      it("IO for significant bone pain from intraosseous administration", "\\bio\\b|intraoss|bone")
+    ],
+    indNeed: 3,
+    contra: [ALLERGY, it("Local infection in the area of injection", "infect")],
+    cautions: [it("Taking an anticoagulant (ring blocks)", "anticoag|warfarin|thinner")],
+    pregnancy: "Safe. May be administered if indicated.",
+    doses: [
+      { label: "Subcutaneous", text: "Maximum 200 mg (20 ml of 1% lignocaine) for an adult. May be repeated once after 30 minutes. See the paediatric drug dose tables for a child.",
+        q: "What is the maximum adult SC dose of 1% lignocaine?", ans: [[200, "mg"]] },
+      { label: "Intraosseous", text: "50 mg (5 ml of 1% lignocaine) for an adult. May be repeated once after 15 minutes. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IO dose of 1% lignocaine?", ans: [[50, "mg"]] }
+    ],
+    admin: [
+      "Before IV cannulation: raise a SC bleb at the site and wait about one minute.",
+      "Ring block: about 1–2 ml into the tissue on either side of the web space of the digit.",
+      "IO: give slowly over 1–2 minutes and wait one more minute before infusing fluid."
+    ],
+    adverse: "Stinging at the time of injection.",
+    onset: "1–2 minutes for IV cannulation. 5–10 minutes for digital ring blocks",
+    duration: "30–60 minutes",
+    onsetQ: { q: "What is the usual duration of effect of 1% lignocaine?", nums: [30, 60], unit: "min" },
+    prep: "Ampoule containing 50 mg in 5 ml.",
+    keyPoints: [
+      "Never apply it topically to the eye: the preservative may cause harm.",
+      "Warming it, for example in a pocket or hand, may reduce the sting.",
+      "Overdose (over 3 mg/kg, or over 1 mg/kg given IV by mistake) can cause tingling around the mouth, seizures, dysrhythmias, hypotension and cardiac arrest."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "metoprolol", scope: "para",
+    name: "Metoprolol tartrate",
+    aliases: ["metoprolol", "metoprolol tartrate", "betaloc", "lopresor"],
+    ref: "EAS 14.52",
+    src: "current",
+    routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
+    moa: ["Metoprolol is an immediate release beta blocker. It blocks beta-1 receptors in the heart, decreasing heart rate, cardiac output and blood pressure."],
+    moaKeys: ["beta"],
+    indications: [it("Adults with moderate cardiovascular compromise from atrial fibrillation, with a ventricular rate predominantly > 130/minute", "\\baf\\b|atrial fib", "130|rapid|fast")],
+    indNeed: 1,
+    contra: [ALLERGY, it("Hypotension (metoprolol will further reduce the blood pressure)", "hypotens|low bp|low blood")],
+    cautions: [
+      it("First degree heart block", "first degree|1st degree"),
+      it("Known sick sinus syndrome without an internal pacemaker", "sick sinus"),
+      it("Previous second or third degree heart block without an internal pacemaker", "second|third|2nd|3rd|heart block"),
+      it("Asthma or COPD (may cause bronchospasm; usually withhold if they regularly take bronchodilators)", "asthma|copd|bronch"),
+      it("Heart failure", "heart failure|chf|ccf"),
+      it("Pregnancy", "pregnan")
+    ],
+    pregnancy: "Safety has not been demonstrated. Seek clinical advice before administration. " + BREASTFEED,
+    doses: [{ label: "Dose", text: "25 mg.", q: "What is the dose of metoprolol?", ans: [[25, "mg"]] }],
+    admin: ["Administer PO."],
+    adverse: "None.",
+    onset: "10–20 minutes",
+    duration: "4–6 hours",
+    onsetQ: { q: "What is the usual onset of metoprolol?", nums: [10, 20], unit: "min" },
+    prep: "50 mg tablets (so the 25 mg dose is half a tablet).",
+    keyPoints: [
+      "Give it as indicated even if the patient has already taken their own beta blocker.",
+      "Its blood pressure effect adds to GTN, antihypertensives and amiodarone.",
+      "Its heart rate effect adds to amiodarone and calcium channel blockers such as diltiazem."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "midazolam", scope: "para",
+    name: "Midazolam",
+    aliases: ["midazolam", "hypnovel"],
+    ref: "EAS 14.31",
+    src: "current",
+    routes: [it("IM (acute behavioural disturbance, seizures, last days of life)", "\\bim\\b", "intramusc"), it("IV (seizures, last days of life)", "\\biv\\b", "intraven"), it("SC (last days of life)", "\\bsc\\b", "subcut")],
+    moa: ["Midazolam is a benzodiazepine. It enhances the activity of GABA at GABA receptors in the central nervous system, causing anticonvulsant activity, sedation, amnesia, anxiolysis and muscle relaxation."],
+    moaKeys: ["gaba"],
+    indications: [
+      it("Generalised seizures that continue for more than five minutes, or recurrent seizures", "seizure|fit|convuls"),
+      it("Acute behavioural disturbance causing a mild to moderate risk to safety, when droperidol is unavailable or ineffective (IM)", "behav|agitat|abd\\b"),
+      it("Anxiety or shortness of breath not responding to an opiate during the last days of life", "last days|palliat|end of life|dying")
+    ],
+    indNeed: 3,
+    contra: [ALLERGY],
+    cautions: [
+      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Respiratory depression or at high risk of it, for example severe COPD, morbid obesity or home BiPAP", "respirat|copd|obes|bipap"),
+      it("Signs of shock", "shock|hypotens"),
+      it("Concurrent opiates or ketamine", "opi(ate|oid)|ketamine|fentanyl|morphine"),
+      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail")
+    ],
+    pregnancy: "Safety has not been demonstrated during pregnancy, but midazolam should be administered if indicated. " + BREASTFEED,
+    doses: [
+      { label: "Seizures (CPG EAS 5.8)", text: "5 mg IV for an adult (consider 3 mg if a caution is present), may be repeated once after five minutes. If IV access has not been obtained: 10 mg IM (consider 5 mg if a caution is present), may be repeated once after ten minutes. See the paediatric drug dose tables for a child.",
+        q: "Adult midazolam doses for a seizure: IV and IM?", keys: ["\\b5 ?mg|\\b5\\b", "10"], kind: "Dose" },
+      { label: "Acute behavioural disturbance (CPG EAS 5.1)", text: "10 mg IM (consider 5 mg if a caution is present). The IM dose may be repeated once after 20 minutes.",
+        q: "What is the IM dose of midazolam for acute behavioural disturbance?", ans: [[10, "mg"]] },
+      { label: "Last days of life", text: "1–2 mg IV or 2.5–5 mg IM/SC, with additional doses as required." }
+    ],
+    admin: [
+      "IV: dilute 2 ml from a 15 mg/3 ml ampoule to 10 ml with 0.9% sodium chloride (1 mg/ml) and give as a bolus.",
+      "IM: draw up from a 15 mg/3 ml ampoule and do not dilute. Preferably the lateral thigh, otherwise the lateral upper arm.",
+      "If a dose range is given, use the lower end if a caution is present."
+    ],
+    adverse: "Sedation, respiratory depression, hypotension, amnesia.",
+    onset: "IV: 2–3 minutes. IM: 3–5 minutes",
+    duration: "30–60 minutes (sedation may last longer, particularly in the elderly)",
+    onsetQ: { q: "What is the usual onset of IV midazolam?", nums: [2, 3], unit: "min" },
+    prep: "Ampoule containing 15 mg in 3 ml.",
+    keyPoints: [
+      "Paramedics give IM for behavioural disturbance, seizures and the last days of life, and IV for seizures and the last days of life. Other routes and indications are ICP and CCP scope.",
+      "If seizures continue or recur after two parenteral doses, give levetiracetam.",
+      "Effects are increased and prolonged by other benzodiazepines, opiates, ketamine and alcohol."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "morphine", scope: "para",
+    name: "Morphine",
+    aliases: ["morphine"],
+    ref: "EAS 14.32",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc"), it("SC", "\\bsc\\b", "subcut")],
+    moa: ["Morphine is an opiate analgesic. It is an opiate agonist that binds to opiate receptors in the brain and spinal cord, causing analgesia."],
+    moaKeys: ["opi(ate|oid)"],
+    indications: [
+      it("Moderate to severe pain", "pain|analges"),
+      it("Cardiogenic pulmonary oedema with severe anxiety", "pulmonary|oedema|edema|anxi"),
+      it("Control of pain, agitation or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
+      it("Autonomic dysreflexia, even if the patient cannot feel pain", "dysreflex")
+    ],
+    indNeed: 3,
+    contra: [ALLERGY, it("Renal failure", "renal|kidney")],
+    cautions: [it("None listed in the morphine monograph (see the analgesia guideline)", "none|nil|^\\s*no\\b")],
+    pregnancy: "",
+    doses: [
+      { label: "IV bolus (CPG EAS 1.18)", text: "1–5 mg IV for an adult. Repeat as required every five minutes. See the paediatric drug dose tables for a child.",
+        q: "What is the adult IV bolus dose range of morphine, and how often?", keys: ["\\b1\\b", "\\b5\\b"], kind: "Dose" },
+      { label: "IM and SC (CPG EAS 1.18)", text: "5–10 mg IM/SC for an adult. Halve the dose if frail or signs of shock. Repeat as required every 20 minutes, up to a maximum of three doses.",
+        q: "What is the adult IM/SC dose range of morphine?", keys: ["\\b5\\b", "10"], kind: "Dose" },
+      { label: "Autonomic dysreflexia", text: "2–3 mg increments to a total of 10 mg, even if the patient cannot feel pain." }
+    ],
+    admin: ["The IV route is preferred for severe pain. IM/SC is reserved for patients in whom IV is clinically inappropriate."],
+    adverse: "",
+    onset: "",
+    duration: "",
+    prep: "Ampoule containing 10 mg in 1 ml.",
+    keyPoints: [
+      "Contraindicated in renal failure: choose fentanyl instead.",
+      "Usually preferred over fentanyl when analgesia is needed for longer, or during the last days of life.",
+      "Before ketamine for pain, give enough opiate that more adds nothing, usually 15–20 mg morphine for an adult."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "naloxone", scope: "para",
+    name: "Naloxone",
+    aliases: ["naloxone", "narcan"],
+    ref: "EAS 14.33",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc")],
+    moa: ["Naloxone is an opiate receptor antagonist. By blocking opiate receptors it reverses the effects of opiates, particularly respiratory depression and sedation."],
+    moaKeys: ["antagon|block|revers"],
+    indications: [
+      it("Suspected opiate poisoning with a significantly impaired level of consciousness or significantly impaired breathing", "poison|overdose|\\bod\\b"),
+      it("Excess adverse effects from administration of opiates", "adverse|excess|side effect|iatrogen")
+    ],
+    indNeed: 2,
+    contra: [ALLERGY],
+    cautions: [it("Chronic opiate use (risk from rapid opiate withdrawal)", "chronic|regular|withdraw|dependen")],
+    pregnancy: "Safety has not been demonstrated in pregnancy, but naloxone should be administered if indicated. " + BREASTFEED,
+    doses: [
+      { label: "IV", text: "0.1–0.4 mg IV every five minutes as required for an adult.", q: "What is the adult IV dose range of naloxone?", keys: ["0\\.1", "0\\.4"], kind: "Dose" },
+      { label: "IM", text: "0.8 mg IM as required for an adult. May be repeated every 10 minutes. See the paediatric drug dose tables for a child.", q: "What is the adult IM dose of naloxone?", ans: [[0.8, "mg"]] }
+    ],
+    admin: [
+      "IV is preferred: dilute 0.4 mg to 4 ml (0.1 mg/ml). Give the minimum dose needed to produce improvement.",
+      "IM: undiluted, preferably the lateral thigh, otherwise the lateral upper arm."
+    ],
+    adverse: "Sweating, tachycardia, hypertension.",
+    onset: "IV: 1–2 minutes. IM: 5–10 minutes",
+    duration: "30–60 minutes (may be shorter than the opiate's, so it may need repeating)",
+    onsetQ: { q: "What is the usual onset of IV naloxone?", nums: [1, 2], unit: "min" },
+    prep: "Ampoule containing 0.4 mg in 1 ml.",
+    keyPoints: [
+      "No role in cardiac arrest from opiate poisoning: focus on CPR with ventilation. Don't give it after ROSC either.",
+      "Rapid reversal can cause seizures, hypertension, pulmonary oedema or severe agitation, especially in regular opiate users.",
+      "Treating severe hypoxia comes before naloxone.",
+      "Plan a team approach for safety: withdrawal can cause agitation or aggression."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "olanzapine", scope: "para",
+    name: "Olanzapine",
+    aliases: ["olanzapine", "zyprexa"],
+    ref: "EAS 14.34",
+    src: "current",
+    routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
+    moa: ["Olanzapine is an atypical antipsychotic. It acts at multiple receptors in the brain, reducing agitation and causing sedation, anxiolysis and stabilisation of mood."],
+    moaKeys: ["antipsychot|receptor|agitat|sedat"],
+    indications: [it("Aged ≥ 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when the patient will take an oral medicine", "behav|agitat|abd\\b")],
+    indNeed: 1,
+    contra: [ALLERGY, it("Poisoning with an antipsychotic, for example quetiapine, risperidone or olanzapine", "antipsychot|quetiapine|risperidone|olanzapine|poison")],
+    cautions: [
+      it("Pregnancy", "pregnan"),
+      it("Intoxication (effects increased and prolonged)", "intox|alcohol|drunk|drug"),
+      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail")
+    ],
+    pregnancy: "Safety has not been demonstrated during pregnancy and olanzapine should usually be withheld. " + BREASTFEED,
+    doses: [{ label: "Dose", text: "10 mg PO. Consider reducing the dose to 5 mg PO if a caution is present. The dose may be repeated once after 20 minutes.", q: "What is the dose of olanzapine?", ans: [[10, "mg"]] }],
+    admin: ["Administer PO. The dispersible tablet dissolves in the mouth; a sip of liquid helps but is not routinely needed. It may also be dissolved in water, tea or coffee."],
+    adverse: "Sedation.",
+    onset: "10–20 minutes",
+    duration: "12–24 hours",
+    onsetQ: { q: "What is the usual onset of olanzapine?", nums: [10, 20], unit: "min" },
+    prep: "5 mg dispersible tablets (wafers).",
+    keyPoints: [
+      "First choice for behavioural disturbance when the patient will take an oral medicine. Droperidol is next if it isn't taken or doesn't work.",
+      "Contraindicated if the patient has taken too much of an antipsychotic.",
+      "Sedation is increased with alcohol, recreational drugs, midazolam or droperidol."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "oxytocin", scope: "para",
+    name: "Oxytocin",
+    aliases: ["oxytocin", "syntocinon"],
+    ref: "EAS 14.36",
+    src: "current",
+    routes: [it("IM", "\\bim\\b", "intramusc"), it("IV (postpartum haemorrhage, preferred)", "\\biv\\b", "intraven")],
+    moa: ["Oxytocin is a synthetic version of the hormone normally released from the pituitary gland. It stimulates oxytocin receptors on the uterus, increasing uterine contraction and reducing blood loss from the uterus."],
+    moaKeys: ["uter|contract"],
+    indications: [it("Following normal birth", "birth|deliver"), it("Postpartum haemorrhage", "pph|postpartum|post-partum|haemorrh|hemorrh|bleed")],
+    indNeed: 2,
+    contra: [ALLERGY],
+    cautions: NONE,
+    pregnancy: "Safe and should be administered if indicated.",
+    doses: [
+      { label: "Following normal birth", text: "10 units IM.", q: "What dose of oxytocin is given after a normal birth, and by what route?", keys: ["10", "\\bim\\b|intramusc"], kind: "Dose" },
+      { label: "Postpartum haemorrhage", text: "10 units IV (preferred), or 10 units IM. If IM oxytocin was already given after the birth, give an additional dose (in the other thigh if IM).",
+        q: "What is the dose of oxytocin for postpartum haemorrhage?", keys: ["10"], kind: "Dose" }
+    ],
+    admin: [
+      "IV: 10 units in a 1 litre bag of 0.9% sodium chloride (0.01 units/ml), shaken and labelled, given over about 60 minutes (about 4 drops per second). The rate may be increased if shock is present.",
+      "IM: undiluted, preferably the lateral thigh, otherwise the lateral upper arm.",
+      "If there are multiple babies, give it after the last baby is delivered."
+    ],
+    adverse: "Abdominal cramping, tachycardia, flushing.",
+    onset: "5–10 minutes",
+    duration: "30–60 minutes",
+    onsetQ: { q: "What is the usual onset of oxytocin?", nums: [5, 10], unit: "min" },
+    prep: "Ampoule containing 10 units in 1 ml.",
+    keyPoints: [
+      "Doses are in units, not mg.",
+      "With twins or more, wait until the last baby is born.",
+      "Out of a kit it must be refrigerated. In a kit it is labelled with a discard date eight weeks after leaving the fridge."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "tenecteplase", scope: "para",
+    name: "Tenecteplase",
+    aliases: ["tenecteplase", "metalyse", "tnk"],
+    ref: "EAS 14.45",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven")],
+    moa: ["Tenecteplase is a fibrinolytic. It converts plasminogen into the active enzyme plasmin, which breaks down fibrin within blood clots."],
+    moaKeys: ["plasmin|fibrin"],
+    indications: [it("STEMI when following the fibrinolytic pathway", "stemi|fibrinoly|thrombolys")],
+    indNeed: 1,
+    contra: [ALLERGY],
+    cautions: [
+      it("More than ten minutes of CPR", "cpr"),
+      it("Non-compressible vascular puncture within the last 24 hours", "puncture"),
+      it("Internal bleeding within the last six weeks", "internal bleed|gi bleed"),
+      it("Lumbar puncture or epidural within the last six weeks", "lumbar|epidural"),
+      it("TIA within the last three months", "\\btia\\b|transient"),
+      it("Known bleeding disorder", "bleeding disorder|haemophil|coagul"),
+      it("Taking an anticoagulant", "anticoag|warfarin|thinner"),
+      it("Systolic BP > 180 mmHg or diastolic BP > 110 mmHg", "180|110|hypertens|\\bbp\\b"),
+      it("Known to be pregnant or less than two weeks postpartum", "pregnan|postpartum"),
+      it("Symptom onset more than 12 hours ago", "12 ?h|twelve"),
+      it("Needs assistance with activities of daily living", "adl|daily living|assistance"),
+      it("Severe comorbidities that significantly limit life expectancy", "comorbid|life expect"),
+      it("Suspected aortic dissection", "dissect"),
+      it("Major surgery, major trauma or severe brain injury within the last six weeks", "surgery|trauma"),
+      it("Intracranial surgery within the last six months", "intracranial|neurosurg"),
+      it("Ischaemic stroke within the last six months", "stroke|cva"),
+      it("Previous intracerebral haemorrhage", "intracerebral|brain bleed|haemorrhagic stroke"),
+      it("Known cerebral aneurysm, arteriovenous malformation or tumour", "aneurysm|avm|arteriovenous|tumou?r")
+    ],
+    pregnancy: "Pregnancy or within two weeks of birth carries a significant risk of bleeding. Seek clinical advice before administration. " + BREASTFEED,
+    doses: [
+      { label: "Aged < 75 years (IV)", text: "<60 kg 30 mg (6 ml) · 60–69 kg 35 mg (7 ml) · 70–79 kg 40 mg (8 ml) · 80–89 kg 45 mg (9 ml) · ≥90 kg 50 mg (10 ml).", q: "Tenecteplase for an 84 kg patient aged under 75?", ans: [[45, "mg"]] },
+      { label: "Aged ≥ 75 years (IV)", text: "<60 kg 15 mg (3 ml) · 60–69 kg 17.5 mg (3.5 ml) · 70–79 kg 20 mg (4 ml) · 80–89 kg 22.5 mg (4.5 ml) · ≥90 kg 25 mg (5 ml).", q: "Tenecteplase for a 78-year-old weighing 72 kg?", ans: [[20, "mg"]] }
+    ],
+    admin: [
+      "Dissolve the powder using the syringe in the kit.",
+      "Discard unwanted drug, preferably back into the ampoule, so the correct dose remains. If an error means the correct dose can't be drawn up, give what remains, document it and tell the receiving clinician.",
+      "Administer undiluted as an IV bolus, preferably into a running IV line."
+    ],
+    adverse: "Bleeding (commonly superficial: epistaxis, bruising, IV sites). Dysrhythmia on reperfusion, most commonly accelerated idioventricular rhythm (AIVR), which needs no specific treatment.",
+    onset: "5–10 minutes",
+    duration: "2–6 hours",
+    onsetQ: { q: "What is the usual duration of effect of tenecteplase?", nums: [2, 6], unit: "hour" },
+    prep: "Glass ampoule with 50 mg tenecteplase powder and a pre-filled syringe of 10 ml sterile water.",
+    keyPoints: [
+      "The dose depends on age (< 75 or ≥ 75) and known or estimated weight. Over 75, it is half the dose.",
+      "Every dose works out at 5 mg per ml after reconstitution.",
+      "AIVR after reperfusion is common and needs no specific treatment."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "ticagrelor", scope: "para",
+    name: "Ticagrelor",
+    aliases: ["ticagrelor", "brilinta"],
+    ref: "EAS 14.53",
+    src: "current",
+    routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
+    moa: ["Ticagrelor has antiplatelet activity. It reversibly inhibits the ADP receptor on platelets, decreasing platelet aggregation."],
+    moaKeys: ["platelet|adp"],
+    indications: [it("STEMI on the primary PCI pathway, when requested by the accepting clinician", "stemi|pci", "request|accepting|clinician|cardiolog")],
+    indNeed: 1,
+    contra: [ALLERGY],
+    cautions: [
+      it("Clinically significant bleeding (ticagrelor will increase bleeding)", "bleed"),
+      it("At risk of bleeding", "risk"),
+      it("Pregnancy", "pregnan")
+    ],
+    pregnancy: "Safety has not been demonstrated. Seek clinical advice before administration. " + BREASTFEED,
+    doses: [{ label: "Dose", text: "180 mg for an adult.", q: "What is the adult dose of ticagrelor?", ans: [[180, "mg"]] }],
+    admin: ["Administer PO."],
+    adverse: "Increased bleeding.",
+    onset: "30–60 minutes",
+    duration: "24 hours",
+    onsetQ: { q: "What is the usual duration of effect of ticagrelor?", nums: [24], unit: "hour" },
+    prep: "90 mg tablet (so the dose is two tablets).",
+    keyPoints: [
+      "Ticagrelor goes with the primary PCI pathway. Clopidogrel goes with fibrinolysis.",
+      "Only give it when the accepting clinician asks for it.",
+      "Bleeding risk is increased if the patient takes an anticoagulant."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "tranexamic", scope: "para",
+    name: "Tranexamic acid",
+    aliases: ["tranexamic", "tranexamic acid", "txa", "cyklokapron"],
+    ref: "EAS 14.47",
+    src: "current",
+    routes: [it("IV", "\\biv\\b", "intraven"), it("IN (epistaxis)", "\\bin\\b", "intranas", "nasal"), it("Nebulised (bleeding after tonsillectomy)", "nebul")],
+    moa: ["Tranexamic acid is an antifibrinolytic. It blocks the conversion of plasminogen to plasmin, reducing fibrinolysis (breakdown of blood clots) and bleeding."],
+    moaKeys: ["plasmin|fibrinoly"],
+    indications: [
+      it("Postpartum haemorrhage", "pph|postpartum|post-partum"),
+      it("Clinically significant bleeding or signs of hypovolaemia following trauma", "trauma"),
+      it("Non-traumatic bleeding with severe shock", "non-?trauma|shock"),
+      it("Cardiac arrest secondary to trauma", "arrest"),
+      it("Bleeding following tonsillectomy", "tonsil"),
+      it("Crush injury", "crush"),
+      it("Moderate to severe epistaxis not controlled after one dose of adrenaline IN", "epistaxis|nose ?bleed"),
+      it("Antepartum haemorrhage with shock and/or severe bleeding", "antepartum|aph\\b")
+    ],
+    indNeed: 5,
+    contra: [ALLERGY, it("Trauma when it would be given more than three hours after the injury (appears to increase mortality)", "3 ?h|three hours|3 hours")],
+    cautions: NONE,
+    pregnancy: "Safety has not been demonstrated, but the balance of risk is such that it should be administered if indicated.",
+    doses: [
+      { label: "Bleeding following trauma", text: "2 g IV for an adult. See the paediatric drug dose tables for a child.", q: "What is the adult dose of tranexamic acid for bleeding after trauma?", ans: [[2, "g"]] },
+      { label: "Non-traumatic bleeding", text: "1 g IV for an adult. See the paediatric drug dose tables for a child.", q: "What is the adult dose of tranexamic acid for non-traumatic bleeding?", ans: [[1, "g"]] },
+      { label: "Bleeding following tonsillectomy", text: "500 mg nebulised for an adult or child, repeated once after 30 minutes. 1 g IV for an adult. See the paediatric drug dose tables for a child.",
+        q: "What is the nebulised dose of tranexamic acid for bleeding after tonsillectomy?", ans: [[500, "mg"]] },
+      { label: "Moderate to severe epistaxis", text: "200 mg (2 ml undiluted) per bleeding nostril for a patient aged 12 years or over. 100 mg (1 ml undiluted) per bleeding nostril for a child aged 5–11 years. Seek clinical advice if the child is under five.",
+        q: "What is the IN dose of tranexamic acid per bleeding nostril for an adult?", ans: [[200, "mg"]] }
+    ],
+    admin: ["IV: over 1–2 minutes.", "Nebulised: undiluted.", "IN: undiluted."],
+    adverse: "None.",
+    onset: "30–60 minutes",
+    duration: "8 hours",
+    onsetQ: { q: "What is the usual duration of effect of tranexamic acid?", nums: [8], unit: "hour" },
+    prep: "10 ml ampoule containing 1 g. 5 ml ampoule containing 500 mg.",
+    keyPoints: [
+      "In trauma, don't give it more than three hours after the injury.",
+      "Trauma dose is 2 g IV. Non-traumatic bleeding is 1 g IV.",
+      "Renal impairment does not change the initial (loading) dose."
+    ]
+  },
+  /* ------------------------------------------------------------------ */
+  {
+    id: "glucose10", scope: "para",
+    name: "Glucose 10% IV",
+    aliases: ["glucose", "glucose 10%", "glucose 10% iv", "dextrose", "d10", "10% glucose"],
+    ref: "EAS 5.3",
+    src: "current",
+    skip: ["contra", "caut", "moa", "onset"],
+    noMonograph: "There is no glucose IV monograph in the CPGs. This entry comes from the Hypoglycaemia guideline (CPG EAS 5.3).",
+    routes: [it("IV", "\\biv\\b", "intraven")],
+    moa: ["10% glucose contains 10 g of glucose in 100 ml."],
+    moaKeys: ["glucose"],
+    indications: [it("Hypoglycaemia (blood glucose < 3.5 mmol/litre) with a significantly altered level of consciousness, or unable to swallow safely", "hypo|low (blood )?(sugar|glucose)|3\\.5", "conscious|swallow|loc\\b|gcs")],
+    indNeed: 1,
+    contra: [],
+    cautions: [],
+    pregnancy: "",
+    doses: [
+      { label: "Adult", text: "100 ml of 10% glucose IV.", q: "What is the adult dose of 10% glucose IV for hypoglycaemia?", ans: [[100, "ml"]] },
+      { label: "Child", text: "2 ml/kg of 10% glucose IV.", q: "What is the child dose of 10% glucose IV?", keys: ["\\b2\\b", "kg"], kind: "Dose" }
+    ],
+    admin: ["Repeat the glucose measurement every ten minutes until it is consistently above 3.5 mmol/litre. Give further doses if required."],
+    adverse: "",
+    onset: "",
+    duration: "",
+    prep: "10% glucose: 100 ml contains 10 g of glucose.",
+    keyPoints: [
+      "If they can swallow safely, give 10–20 g of glucose PO instead.",
+      "If IV access can't be obtained, give glucagon IM. Glucose can be repeated, glucagon IM is not.",
+      "Recheck the glucose every ten minutes."
+    ]
+  }
+];
+
+/* Paramedic additions to drugs that are also EMT scope. Items flagged para: true
+   only appear when the student's practice level is Paramedic. */
+const PARA_ADDITIONS = {
+  adrenaline: {
+    routes: [it("IV (cardiac arrest only)", "\\biv\\b", "intraven")],
+    indications: [it("Cardiac arrest (IV)", "arrest")],
+    doses: [{ label: "Cardiac arrest (CPG EAS 3.14)", text: "1 mg IV every four minutes for an adult. See the paediatric drug dose tables for a child. Give it undiluted as an IV bolus for adults and children rounded to 50 kg or more.",
+      q: "What is the adult dose of adrenaline in cardiac arrest, and how often?", keys: ["\\b1 ?mg|\\b1\\b", "4 ?min|four"], kind: "Dose" }]
+  },
+  ondansetron: {
+    routes: [it("IV (preferred)", "\\biv\\b", "intraven")],
+    doses: [{ label: "IV", text: "8 mg IV once for an adult. See the paediatric drug dose tables for a child. One IV dose may be given in addition to one IM dose if nausea and/or vomiting persists and IV access is then obtained (a maximum of 12 mg for an adult).",
+      q: "What is the adult IV dose of ondansetron?", ans: [[8, "mg"]] }]
+  }
+};
+
+/* ---- practice level ---- */
+const SCOPE = (() => { try { return JSON.parse(localStorage.getItem("drugbag.scope")) || "emt"; } catch (e) { return "emt"; } })();
+const DRUGS = (() => {
+  const base = EMT_DRUGS.map(d => {
+    const add = SCOPE === "para" && PARA_ADDITIONS[d.id];
+    if (!add) return d;
+    const tag = arr => arr.map(x => Object.assign({}, x, { para: true }));
+    return Object.assign({}, d, {
+      routes: [...d.routes, ...tag(add.routes || [])],
+      indications: [...d.indications, ...tag(add.indications || [])],
+      doses: [...d.doses, ...tag(add.doses || [])]
+    });
+  });
+  return SCOPE === "para" ? [...base, ...PARA_DRUGS] : base;
+})();
+
+/* ---- paramedic call-outs (only shown at Paramedic level) ---- */
+const PARA_SCENARIOS = [
+  {
+    id: "p-vf", scope: "para", title: "Collapsed in the kitchen",
+    tags: ["amiodarone", "adrenaline"],
+    stem: "A 58-year-old man collapsed at home. Bystander CPR is under way. Your monitor shows VF. You've given three shocks and he is still in VF. IV access is in.",
+    steps: [
+      { type: "give", prompt: "After the third shock: drug, dose and route?",
+        drug: "amiodarone", dose: [[300, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Amiodarone is indicated in cardiac arrest with VF or VT after three shocks: 300 mg IV for an adult, undiluted as a bolus." },
+      { type: "choice", prompt: "How is adrenaline given during this arrest?",
+        options: ["0.5 mg IM every five minutes", "1 mg IV every four minutes", "1 mg IV once only", "0.1 mg IV every two minutes"],
+        answer: 1,
+        explain: "Cardiac arrest: adrenaline 1 mg IV every four minutes for an adult (CPG EAS 3.14). IV adrenaline at paramedic level is for cardiac arrest only." },
+      { type: "choice", prompt: "He's still in VF after the sixth shock. Can he have more amiodarone?",
+        options: ["No, 300 mg is the maximum", "Yes, a second dose of 150 mg", "Yes, another 300 mg", "Only after discussing with clinical advice"],
+        answer: 1,
+        explain: "If in VF or VT after six shocks, a second dose of 150 mg may be administered." }
+    ]
+  },
+  {
+    id: "p-femur", scope: "para", title: "Fell from the roof",
+    tags: ["fentanyl", "ketamine"],
+    stem: "A 34-year-old builder (78 kg) fell from a roof and has an obviously deformed thigh. Pain 9/10. Vital signs are normal and he has no allergies. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "Which IV fentanyl dosing is right for him?",
+        options: ["100 mcg IV once", "10–50 mcg IV every five minutes as required", "1 mcg/kg IV every 20 minutes", "50–100 mcg IV every 20 minutes"],
+        answer: 1,
+        explain: "IV bolus for analgesia: 10–50 mcg every five minutes for an adult, as required. Use the lower end if frail or signs of shock." },
+      { type: "choice", prompt: "He's had 200 mcg of fentanyl and further doses aren't helping. What next?",
+        options: ["Keep giving fentanyl until the pain settles", "Add ketamine for pain not controlled by an opiate", "Give midazolam for pain", "Give paracetamol and wait"],
+        answer: 1,
+        explain: "Ketamine is indicated for severe pain not adequately controlled with an opiate, usually after 150–200 mcg of fentanyl for an adult." },
+      { type: "give", prompt: "Ketamine: drug, dose and route? (Round his weight up to the nearest 10 kg.)",
+        drug: "ketamine", dose: [[16, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "78 kg rounds up to 80 kg. 0.2 mg/kg × 80 = 16 mg IV (maximum 20 mg), given over approximately 15 minutes. Warn him he may feel strange." }
+    ]
+  },
+  {
+    id: "p-opiate", scope: "para", title: "Found in a park toilet",
+    tags: ["naloxone"],
+    stem: "A man in his 30s is found unresponsive with pinpoint pupils and a syringe beside him. His respiratory rate is 4 and SpO₂ 82%. He has a pulse. You're ventilating with a bag-valve-mask.",
+    steps: [
+      { type: "give", prompt: "IV access isn't available yet. Drug, dose and route?",
+        drug: "naloxone", dose: [[0.8, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Naloxone 0.8 mg IM for an adult, repeated every 10 minutes as required. IV is preferred when available: 0.1–0.4 mg every five minutes." },
+      { type: "choice", prompt: "Once IV access is in, how should naloxone be given?",
+        options: ["A full 2 mg bolus to reverse him quickly", "The minimum dose needed to produce improvement", "0.8 mg IV every two minutes", "Only after he is fully oxygenated"],
+        answer: 1,
+        explain: "Give the minimum dose required. Rapid reversal can cause seizures, hypertension, pulmonary oedema or severe agitation, especially in regular opiate users." },
+      { type: "choice", prompt: "If he went into cardiac arrest, what role would naloxone have?",
+        options: ["Give 2 mg IV straight away", "None. Focus on CPR with ventilation", "Give it after the first shock", "Give it only if ROSC occurs"],
+        answer: 1,
+        explain: "There is no role for naloxone in cardiac arrest from opiate poisoning, or after ROSC. The best treatment is CPR with a focus on ventilation." }
+    ]
+  },
+  {
+    id: "p-seizure", scope: "para", title: "Still shaking after five minutes",
+    tags: ["midazolam", "levetiracetam"],
+    stem: "A 41-year-old woman (70 kg) with known epilepsy has had a generalised seizure for over five minutes. Her blood glucose is 6.2 mmol/litre. You have IV access.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route?",
+        drug: "midazolam", dose: [[5, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Seizures: midazolam 5 mg IV for an adult (consider 3 mg if a caution is present), which may be repeated once after five minutes. Without IV access: 10 mg IM." },
+      { type: "give", prompt: "The seizure continues after a second dose of midazolam. Drug, dose and route?",
+        drug: "levetiracetam", dose: [[2, "g"]], route: ["\\biv\\b", "intraven"],
+        explain: "Levetiracetam 2 g IV over 5 minutes for a seizure that continues or recurs after two parenteral doses of midazolam. Never IM." }
+    ]
+  },
+  {
+    id: "p-stemi", scope: "para", title: "Two hours from the cath lab",
+    tags: ["tenecteplase", "clopidogrel", "enoxaparin"],
+    stem: "A 64-year-old farmer (85 kg) has had crushing chest pain for 90 minutes. His ECG shows an inferior STEMI. The nearest PCI centre is over two hours away and he's on the fibrinolytic pathway. His BP is 150/90. He has no other bleeding risks on the checklist.",
+    steps: [
+      { type: "give", prompt: "Fibrinolytic: drug, dose and route?",
+        drug: "tenecteplase", dose: [[45, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Aged under 75, 80–89 kg: tenecteplase 45 mg (9 ml) IV, undiluted as a bolus, preferably into a running line." },
+      { type: "give", prompt: "Antiplatelet to go with it: drug, dose and route?",
+        drug: "clopidogrel", dose: [[300, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Clopidogrel 300 mg PO if aged under 75 (75 mg if 75 or over), with fibrinolytic therapy." },
+      { type: "choice", prompt: "Which enoxaparin doses does he get?",
+        options: ["30 mg IV only", "30 mg IV, plus 90 mg SC by weight", "100 mg SC only", "None: enoxaparin is only for patients over 75"],
+        answer: 1,
+        explain: "Enoxaparin 30 mg IV (only if under 75), plus SC by age and weight: under 75 and 80–89 kg is 90 mg (0.9 ml)." },
+      { type: "choice", prompt: "If his BP had been 190/115, what would that mean for tenecteplase?",
+        options: ["Nothing, give it as normal", "It's a caution, so seek clinical advice", "Halve the dose", "Give GTN first, then tenecteplase"],
+        answer: 1,
+        explain: "Systolic BP above 180 mmHg or diastolic above 110 mmHg is a caution for tenecteplase. If any caution on the fibrinolytic checklist is present, seek clinical advice." }
+    ]
+  },
+  {
+    id: "p-mening", scope: "para", title: "A rash that doesn't fade",
+    tags: ["ceftriaxone"],
+    stem: "A 19-year-old student (65 kg) has a fever, is drowsy and has a purple rash that doesn't fade under a glass. HR 128, BP 92/58. You haven't got IV access yet.",
+    steps: [
+      { type: "give", prompt: "IV access is proving difficult. Drug, dose and route?",
+        drug: "ceftriaxone", dose: [[2, "g"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Suspected meningococcal septicaemia: ceftriaxone 2 g IM if IV access can't be immediately obtained, split into two syringes, one into each lateral thigh. Dissolve it in 0.9% sodium chloride, not lignocaine." },
+      { type: "choice", prompt: "Shortly after the antibiotic his BP falls to 74/40. What's the likely cause?",
+        options: ["An allergic reaction to ceftriaxone", "Endotoxins released as the meningococcal bacteria die", "The IM injection was too fast", "Dehydration from the fever"],
+        answer: 1,
+        explain: "As meningococcal bacteria die they release endotoxins, which can profoundly worsen shock. Be ready to treat with 0.9% sodium chloride IV, and metaraminol or adrenaline IV." }
+    ]
+  },
+  {
+    id: "p-pph", scope: "para", title: "Bleeding after the birth",
+    tags: ["oxytocin", "tranexamic"],
+    stem: "You've just attended a home birth. The baby is well, and oxytocin 10 units IM was given after the birth. Ten minutes later the mother is losing a lot of blood. HR 118, BP 96/60. You have IV access.",
+    steps: [
+      { type: "choice", prompt: "She has already had oxytocin after the birth. Can she have more for the haemorrhage?",
+        options: ["No, one dose is the maximum", "Yes, an additional dose: 10 units IV (preferred) or IM in the other thigh", "Yes, 5 units IV", "Only if the placenta has been delivered"],
+        answer: 1,
+        explain: "If IM oxytocin was given after a normal birth, give an additional dose if postpartum haemorrhage develops: 10 units IV (preferred), or IM in the other thigh. IV: 10 units in 1 litre of 0.9% sodium chloride over about 60 minutes." },
+      { type: "give", prompt: "What else do you give for the haemorrhage? Drug, dose and route.",
+        drug: "tranexamic", dose: [[1, "g"]], route: ["\\biv\\b", "intraven"],
+        explain: "Postpartum haemorrhage: tranexamic acid 1 g IV (CPG EAS 8.2), given over 1–2 minutes." }
+    ]
+  },
+  {
+    id: "p-abd", scope: "para", title: "Pacing and shouting in the hallway",
+    tags: ["olanzapine", "droperidol"],
+    stem: "A 26-year-old man (80 kg) is agitated, pacing and shouting, and frightening his flatmates. He poses a mild to moderate risk to safety. He hasn't taken any drugs or alcohol, and says he'll take a tablet.",
+    steps: [
+      { type: "give", prompt: "He'll take an oral medicine. Drug, dose and route?",
+        drug: "olanzapine", dose: [[10, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Olanzapine 10 mg PO (5 mg if a caution is present) for acute behavioural disturbance with a mild to moderate risk when the patient will take an oral medicine. May be repeated once after 20 minutes." },
+      { type: "give", prompt: "Twenty minutes after the second dose of olanzapine he is no calmer. Drug, dose and route?",
+        drug: "droperidol", dose: [[10, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Droperidol 10 mg IV/IM when olanzapine has not been given or is ineffective (5 mg if a caution is present). It may be repeated once after 20 minutes." }
+    ]
+  },
+  {
+    id: "p-txa-late", scope: "para", title: "Stuck in the ute since dawn",
+    tags: ["tranexamic", "fentanyl"],
+    stem: "A 45-year-old man has been trapped in his ute after rolling it off a back-country road. He crashed about four hours ago. He's pale, HR 124, BP 88/60, with a swollen abdomen.",
+    steps: [
+      { type: "choice", prompt: "Should he have tranexamic acid?",
+        options: ["Yes, 2 g IV for trauma", "Yes, 1 g IV because he's shocked", "No. It's more than three hours since the injury", "Only after 1 litre of 0.9% sodium chloride"],
+        answer: 2,
+        explain: "Tranexamic acid is contraindicated in trauma when it would be given more than three hours after the injury: it appears to increase mortality." },
+      { type: "choice", prompt: "He's in severe pain. How do his shock signs change your fentanyl dosing?",
+        options: ["They don't", "Use doses at the lower end of the range", "Double the dose", "Fentanyl is contraindicated in shock"],
+        answer: 1,
+        explain: "Signs of shock are a caution for fentanyl: use a dose at the lower end of the 10–50 mcg IV range. Fentanyl is usually preferred over morphine when there are signs of shock." }
+    ]
+  },
+  {
+    id: "p-af", scope: "para", title: "Racing heart and light-headed",
+    tags: ["metoprolol"],
+    stem: "A 67-year-old woman has palpitations and feels light-headed. Her ECG shows atrial fibrillation at about 150/minute, with moderate cardiovascular compromise. BP 112/74. She takes her inhalers twice a day for asthma.",
+    steps: [
+      { type: "choice", prompt: "Metoprolol is indicated for AF with moderate compromise. What does her asthma mean?",
+        options: ["Nothing, give 25 mg PO", "It's a caution: metoprolol may cause bronchospasm and should usually be withheld if she regularly takes bronchodilators", "It's a contraindication only if she's wheezy now", "Give half the dose"],
+        answer: 1,
+        explain: "Asthma or COPD is a caution for metoprolol. It may cause bronchospasm and should usually be withheld if the patient regularly takes bronchodilators." },
+      { type: "choice", prompt: "If she didn't have asthma, what dose would you give?",
+        options: ["25 mg PO", "50 mg PO", "5 mg IV", "100 mg PO"],
+        answer: 0,
+        explain: "Metoprolol 25 mg PO (half a 50 mg tablet). Give it even if she has already taken her own beta blocker." }
+    ]
+  }
+];
+if (SCOPE === "para") SCENARIOS.push(...PARA_SCENARIOS);
+
 </script>
 <script>
 /* ===================== Drug Bag app ===================== */
@@ -1903,11 +2979,12 @@ function buildQuestions(ids, types) {
       else if (x.nums) qs.push({ ...base, mark: v => markNums(v, x.nums, x.unit) });
       else if (x.keys) qs.push({ ...base, mark: v => markKeys(v, x.keys) });
     });
-    if (types.includes("routes")) qs.push({ id: `${id}-routes`, drug: d, kind: "Route", q: `What route(s) can an EMT give ${d.name.toLowerCase()} by?`, list: d.routes, mark: v => markList(v, d.routes), model: listText(d.routes) });
+    if (types.includes("routes")) qs.push({ id: `${id}-routes`, drug: d, kind: "Route", q: `What route(s) can ${SCOPE === "para" ? "a paramedic" : "an EMT"} give ${d.name.toLowerCase()} by?`, list: d.routes, mark: v => markList(v, d.routes), model: listText(d.routes) });
     if (types.includes("indications")) qs.push({ id: `${id}-ind`, drug: d, kind: "Indications", q: `List the ${d.indLabel ? d.indLabel : "indications"} for ${d.name.toLowerCase()}.`, list: d.indications, need: d.indNeed, mark: v => markList(v, d.indications, d.indNeed), model: listText(d.indications) });
-    if (types.includes("contra")) qs.push({ id: `${id}-ci`, drug: d, kind: "Contraindications", q: `List the contraindications for ${d.name.toLowerCase()}.`, list: d.contra, mark: v => markList(v, d.contra), model: listText(d.contra) });
-    if (types.includes("cautions")) qs.push({ id: `${id}-caut`, drug: d, kind: "Cautions", q: `List the cautions for ${d.name.toLowerCase()}.`, list: d.cautions, mark: v => markList(v, d.cautions), model: listText(d.cautions) });
-    if (types.includes("moa")) qs.push({ id: `${id}-moa`, drug: d, kind: "Mechanism", q: `Describe the mechanism of action of ${d.name.toLowerCase()}.`, mark: v => markKeys(v, d.moaKeys), model: d.moa, selfCheck: true });
+    const skip = d.skip || [];
+    if (types.includes("contra") && d.contra.length && !skip.includes("contra")) qs.push({ id: `${id}-ci`, drug: d, kind: "Contraindications", q: `List the contraindications for ${d.name.toLowerCase()}.`, list: d.contra, mark: v => markList(v, d.contra), model: listText(d.contra) });
+    if (types.includes("cautions") && d.cautions.length && !skip.includes("caut")) qs.push({ id: `${id}-caut`, drug: d, kind: "Cautions", q: `List the cautions for ${d.name.toLowerCase()}.`, list: d.cautions, mark: v => markList(v, d.cautions), model: listText(d.cautions) });
+    if (types.includes("moa") && !skip.includes("moa")) qs.push({ id: `${id}-moa`, drug: d, kind: "Mechanism", q: `Describe the mechanism of action of ${d.name.toLowerCase()}.`, mark: v => markKeys(v, d.moaKeys), model: d.moa, selfCheck: true });
     if (types.includes("onset") && d.onsetQ) qs.push({ id: `${id}-onset`, drug: d, kind: "Onset / duration", q: d.onsetQ.q, mark: v => markNums(v, d.onsetQ.nums, d.onsetQ.unit), model: [`Onset: ${d.onset}`, d.duration ? `Duration: ${d.duration}` : ""].filter(Boolean) });
     if (types.includes("extra") && d.extraLists) d.extraLists.forEach((x, i) => qs.push({ id: `${id}-x${i}`, drug: d, kind: "Key point", q: x.q, list: x.items, need: x.need, mark: v => markList(v, x.items, x.need), model: listText(x.items) }));
   });
@@ -1971,14 +3048,16 @@ function sectionBody(d, s) {
 }
 function monographHTML(d, compact) {
   const rows = [
-    ["EMT route", d.routes.map(r => r.t).join(", ")],
-    ["Mechanism", ul(d.moa) + secVideo(d.id, "moa")], ["Indications", ul(d.indications)], ["Contraindications", ul(d.contra)], ["Cautions", ul(d.cautions)],
+    d.noMonograph ? ["Note", esc(d.noMonograph)] : null,
+    [SCOPE === "para" ? "Route" : "EMT route", d.routes.map(r => r.t).join(", ")],
+    ["Mechanism", ul(d.moa) + secVideo(d.id, "moa")], ["Indications", ul(d.indications)], d.contra.length ? ["Contraindications", ul(d.contra)] : null, d.cautions.length ? ["Cautions", ul(d.cautions)] : null,
     d.pregnancy ? ["Pregnancy", escV(d.pregnancy)] : null,
     ["Dose", sectionBody(d, "dose")], d.admin ? ["Administration", ul(d.admin)] : null,
     d.adverse ? ["Adverse effects", escV(d.adverse)] : null,
-    ["Onset", escV(d.onset)], d.duration ? ["Duration", escV(d.duration)] : null,
+    d.onset ? ["Onset", escV(d.onset)] : null, d.duration ? ["Duration", escV(d.duration)] : null,
     d.prep ? ["Preparation", escV(d.prep)] : null,
-    d.keyPoints ? ["Key points", ul(d.keyPoints)] : null
+    d.keyPoints ? ["Key points", ul(d.keyPoints)] : null,
+    d.ref ? ["CPG", `${esc(d.ref)} (September 2026)`] : null
   ].filter(Boolean);
   return `<table class="mono${compact ? " compact" : ""}">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>`;
 }
@@ -1991,9 +3070,25 @@ function learnOrder() {
 }
 // "My drugs": the drugs a student has chosen to learn, in their order (Semester 2 = 3 drugs, Semester 3 = all 13)
 const SEM2 = ["methoxyflurane", "paracetamol", "ibuprofen"];
+const PARA_IDS = PARA_DRUGS.map(d => d.id);
 function myDrugs() { const inc = store.get("rv-drugs", DRUGS.map(d => d.id)); return learnOrder().filter(id => inc.includes(id)); }
 function myDrugsIsAll() { return myDrugs().length === DRUGS.length; }
+function setScope(scope) {
+  if (scope === SCOPE) return false;
+  store.set("scope", scope);
+  if (scope === "emt") store.set("rv-drugs", store.get("rv-drugs", []).filter(id => !PARA_IDS.includes(id)));
+  location.reload();
+  return true;
+}
 function setPreset(p) {
+  if (p === "y3") {
+    store.set("drugs-chosen", true);
+    store.set("rv-drugs", [...EMT_DRUGS.map(d => d.id), ...PARA_IDS]);
+    store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]);
+    if (setScope("para")) return;
+    return;
+  }
+  if (SCOPE === "para") { store.set("drugs-chosen", true); store.set("rv-drugs", p === "s2" ? [...SEM2] : EMT_DRUGS.map(d => d.id)); if (p === "s2") { const o = learnOrder(); store.set("learn-order", [...SEM2, ...o.filter(i => !SEM2.includes(i))]); } setScope("emt"); return; }
   if (p === "s2") { store.set("rv-drugs", [...SEM2]); const o = learnOrder(); store.set("learn-order", [...SEM2, ...o.filter(i => !SEM2.includes(i))]); }
   if (p === "s3") store.set("rv-drugs", DRUGS.map(d => d.id));
   store.set("drugs-chosen", true);
@@ -2032,7 +3127,8 @@ function initFlashcards() {
         <p class="hero-kicker">Spaced review</p>
         ${askDrugs ? `<div class="choose-drugs"><h2 class="review-main">Which drugs are you learning?</h2>
           <div class="preset-row"><button class="btn preset" data-preset="s2"><b>Semester 2</b><span>Methoxyflurane, paracetamol, ibuprofen</span></button>
-          <button class="btn preset" data-preset="s3"><b>Semester 3</b><span>All 13 EMT drugs</span></button></div>
+          <button class="btn preset" data-preset="s3"><b>Semester 3</b><span>All 13 EMT drugs</span></button>
+          <button class="btn preset" data-preset="y3"><b>Year 3 (Paramedic)</b><span>All 13 EMT drugs plus ${PARA_DRUGS.length} paramedic drugs</span></button></div>
           <button class="link" data-preset="own">Choose my own drugs and order</button></div>` : n ? `<h2 class="review-main">${n} ${n === 1 ? "card" : "cards"} to review today</h2><p class="small">${due.length} due · ${fresh.length} new${freshDrug ? ` (${esc(freshDrug)}${fresh.some(c => c.drug !== fresh[0].drug) ? " and the next drug" : ""})` : ""}${held ? ` · ${held} more held until tomorrow` : ""}</p>`
         : `<h2 class="review-main">All caught up</h2><p class="small">${upcoming ? `Next reviews ${diffDays(upcoming, t) === 1 ? "tomorrow" : "in " + diffDays(upcoming, t) + " days"}.` : "Nothing scheduled yet."}</p>`}
         <div class="picker-head"><span class="lbl">How do you want to answer?</span></div>
@@ -2049,12 +3145,12 @@ function initFlashcards() {
         <div class="stack">${STAGES.map(([k]) => counts[k] ? `<span class="seg ${k}" style="flex:${counts[k]}"></span>` : "").join("")}</div>
         <div class="legend">${STAGES.map(([k, l]) => `<span><i class="seg ${k}"></i>${l} ${counts[k]}</span>`).join("")}</div>
         ${reorder ? `<p class="small order-help">Tick the drugs you're learning and use the arrows to set the order. New cards come one drug at a time, from the top. You can add more drugs any time.</p>
-          <div class="preset-row small-presets"><button class="btn small-btn" data-preset="s2">Semester 2 (3 drugs)</button><button class="btn small-btn" data-preset="s3">Semester 3 (all 13)</button></div>` : ""}
+          <div class="preset-row small-presets"><button class="btn small-btn" data-preset="s2">Semester 2 (3 drugs)</button><button class="btn small-btn" data-preset="s3">Semester 3 (all 13)</button><button class="btn small-btn" data-preset="y3">Year 3 Paramedic (${EMT_DRUGS.length + PARA_DRUGS.length})</button></div>` : ""}
         ${!reorder && !mine.length ? `<p class="small">No drugs chosen yet. Tap "Choose drugs and order" to pick some.</p>` : ""}
         <ol class="per-drug ordered ${reorder ? "reordering" : ""}">${(reorder ? order : mine).map((id, i) => {
           const d = byId(id); const on = inc.includes(id);
           const qs = buildCards([id]); const m = qs.filter(c => isLearnedC(s[c.id])).length; const st2 = qs.filter(c => s[c.id] && s[c.id].reps).length;
-          return `<li class="pd ${on ? "" : "off"}" data-id="${id}">${reorder ? `<input type="checkbox" class="pd-on" ${on ? "checked" : ""} aria-label="Learn ${esc(shortName(d))}">` : `<span class="pd-n">${i + 1}</span>`}<span class="pd-name">${esc(shortName(d))}${id === upNext && on ? ' <span class="pill new">Up next</span>' : ""}${SEM2.includes(id) && reorder ? ' <span class="pill sem">Sem 2</span>' : ""}</span>
+          return `<li class="pd ${on ? "" : "off"}" data-id="${id}">${reorder ? `<input type="checkbox" class="pd-on" ${on ? "checked" : ""} aria-label="Learn ${esc(shortName(d))}">` : `<span class="pd-n">${i + 1}</span>`}<span class="pd-name">${esc(shortName(d))}${id === upNext && on ? ' <span class="pill new">Up next</span>' : ""}${SEM2.includes(id) && reorder ? ' <span class="pill sem">Sem 2</span>' : ""}${PARA_IDS.includes(id) ? ' <span class="pill para">Paramedic</span>' : ""}</span>
             ${reorder ? `<span class="pd-move"><button class="mv" data-mv="-1" ${i === 0 ? "disabled" : ""} aria-label="Move ${esc(shortName(d))} up">↑</button><button class="mv" data-mv="1" ${i === order.length - 1 ? "disabled" : ""} aria-label="Move ${esc(shortName(d))} down">↓</button></span>`
               : `<div class="bar"><i class="started" style="width:${st2 / qs.length * 100}%"></i><i class="known" style="width:${m / qs.length * 100}%"></i></div>${medalHTML(medals[id] || 0)}`}</li>`;
         }).join("")}</ol>
@@ -2082,7 +3178,7 @@ function initFlashcards() {
       const p = b.dataset.preset;
       if (p === "own") { store.set("drugs-chosen", true); reorder = true; menu(); $(".ordered", root).scrollIntoView({ block: "nearest" }); return; }
       setPreset(p); menu();
-      toast(p === "s2" ? "My drugs: methoxyflurane, paracetamol and ibuprofen." : "My drugs: all 13.");
+      toast(p === "s2" ? "My drugs: methoxyflurane, paracetamol and ibuprofen." : p === "y3" ? "Paramedic level: all EMT and paramedic drugs." : "My drugs: all 13 EMT drugs.");
     });
     $$(".pd-on", root).forEach(c => c.onchange = () => {
       const id = c.closest("li").dataset.id; let inc2 = store.get("rv-drugs", DRUGS.map(d => d.id));
@@ -2309,6 +3405,7 @@ function initReview() {
           <button class="btn primary big-btn" id="rv-start">Start review</button>`
         : `<h2 class="review-main">All caught up</h2><p class="small">${upcoming ? `Next reviews ${diffDays(upcoming, t) === 1 ? "tomorrow" : "in " + diffDays(upcoming, t) + " days"}.` : "Nothing scheduled."} Try a game or a call-out.</p>
           ${counts.new ? `<button class="btn big-btn" id="rv-more">Learn the next drug</button>` : ""}`}
+        <button class="link help-link" id="rv-help">New here? How Drug Bag works</button>
         <div class="today-row">
           <span class="tr-streak ${st.met ? "on" : ""}">${flame}<b>${st.cur ? `${st.cur}-day streak` : "No streak yet"}</b></span>
           <span class="tr-today"><b>${Math.min(st.n, st.goal)} of ${st.goal}</b> today</span>
@@ -2342,6 +3439,7 @@ function initReview() {
     const mb = $("#rv-more"); if (mb) mb.onclick = () => openFlashReview(true);
     $("#rv-drugs-link").onclick = () => { location.hash = "flashcards"; show("flashcards"); };
     $("#rv-progress").onclick = openProgress;
+    $("#rv-help").onclick = openHelp;
     $$("[data-game]", root).forEach(b => b.onclick = () => openGame(b.dataset.game));
   };
   const run = qs => {
@@ -2364,7 +3462,7 @@ function initReview() {
 // every route used by an EMT medicine in the CPGs (value is what the marking checks)
 const ROUTE_OPTIONS = [
   ["IM", "IM (intramuscular)"], ["IN", "IN (intranasal)"], ["Inhaled", "Inhaled (methoxyflurane inhaler)"],
-  ["MDI", "MDI and spacer"], ["Nebulised", "Nebulised"], ["PO", "PO (oral)"], ["SL", "SL (sublingual)"], ["Topical", "Topical"]
+  ["IO", "IO (intraosseous)"], ["IV", "IV (intravenous)"], ["MDI", "MDI and spacer"], ["Nebulised", "Nebulised"], ["PO", "PO (oral)"], ["SC", "SC (subcutaneous)"], ["SL", "SL (sublingual)"], ["Topical", "Topical"]
 ];
 // drugs a call-out involves (given or mentioned), so it can be matched to "My drugs"
 function scenarioDrugs(s) {
@@ -2486,7 +3584,7 @@ function show(v) {
 }
 document.addEventListener("DOMContentLoaded", () => {
   initOverlays(); initMusic(); initHotSeat();
-  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); renderStreak(); watchLobby();
+  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); initHelp(); renderStreak(); watchLobby();
   $$("nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.v; show(b.dataset.v); });
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== "games") show(h); });
   show(location.hash.slice(1) === "games" ? "review" : location.hash.slice(1));
@@ -2532,9 +3630,10 @@ function buildCards(ids) {
       id: `${id}:${sec}`, drug: d, sec, label, q,
       items: items.map(i => ({ t: i.t, check: v => anyKey(v, i.k) })), need: need || items.length
     });
+    const skip = d.skip || [];
     out.push(listCard("ind", "Indications", d.indications, d.indNeed, `List the ${d.indLabel || "indications"} for ${lower(d)}.`));
-    out.push(listCard("contra", "Contraindications", d.contra, 0, `List the contraindications for ${lower(d)}.`));
-    out.push(listCard("caut", "Cautions", d.cautions, 0, `List the cautions for ${lower(d)}.`));
+    if (!skip.includes("contra")) out.push(listCard("contra", "Contraindications", d.contra, 0, `List the contraindications for ${lower(d)}.`));
+    if (!skip.includes("caut")) out.push(listCard("caut", "Cautions", d.cautions, 0, `List the cautions for ${lower(d)}.`));
     // dose and route: route items plus every dose line that can be marked; others are shown as info
     const doseItems = [
       ...d.routes.map(r => ({ t: "Route: " + r.t, check: v => anyKey(v, r.k) })),
@@ -2543,11 +3642,11 @@ function buildCards(ids) {
         check: x.ans ? v => hasQty(v, x.ans) : x.nums ? v => hasNums(v, x.nums, x.unit) : x.keys ? v => allKeys(v, x.keys) : null
       }))
     ];
-    out.push({ id: `${id}:dose`, drug: d, sec: "dose", label: "Dose and route", q: `What is the EMT route and dose of ${lower(d)}?`,
+    out.push({ id: `${id}:dose`, drug: d, sec: "dose", label: "Dose and route", q: `What is the ${SCOPE === "para" ? "" : "EMT "}route and dose of ${lower(d)}?`,
       cover: d.doses.filter(x => !x.qOnly).map(x => x.label), items: doseItems, need: doseItems.filter(i => i.check).length });
-    out.push({ id: `${id}:moa`, drug: d, sec: "moa", label: "Mechanism of action", q: `Describe the mechanism of action of ${lower(d)}.`,
+    if (!skip.includes("moa")) out.push({ id: `${id}:moa`, drug: d, sec: "moa", label: "Mechanism of action", q: `Describe the mechanism of action of ${lower(d)}.`,
       items: [{ t: "Key idea: " + (d.moa.find(l => allKeys(l, d.moaKeys)) || d.moa.join(" ")), check: v => allKeys(v, d.moaKeys) }], model: d.moa, need: 1 });
-    out.push({ id: `${id}:onset`, drug: d, sec: "onset", label: "Onset and duration", q: `What is the usual onset and duration of ${lower(d)}?`,
+    if (d.onset && !skip.includes("onset")) out.push({ id: `${id}:onset`, drug: d, sec: "onset", label: "Onset and duration", q: `What is the usual onset and duration of ${lower(d)}?`,
       items: [
         { t: "Onset: " + d.onset, check: d.onsetQ && /onset/i.test(d.onsetQ.q) ? v => hasNums(v, d.onsetQ.nums, d.onsetQ.unit) : v => (d.onset.match(/\d+/g) || []).every(n => v.includes(n)) },
         ...(d.duration ? [{ t: "Duration: " + d.duration, check: v => (d.duration.match(/\d+/g) || []).slice(0, 2).every(n => v.includes(n)) }] : [])
@@ -3510,6 +4609,9 @@ function openSettings() {
   const perDay = store.get("rv-new2", 7); const mine = myDrugs();
   const seg = (name, cur, opts) => `<div class="seg-row set-seg">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${String(v) === String(cur) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
   $("#setBody").innerHTML = `
+    <div class="set-sec"><p class="lbl">Practice level</p>
+      ${seg("setscope", SCOPE, [["emt", "EMT"], ["para", "Paramedic"]])}
+      <p class="small">Paramedic adds the ${PARA_DRUGS.length} paramedic-scope medicines and the paramedic routes for adrenaline and ondansetron. EMT progress is kept either way.</p></div>
     <div class="set-sec"><p class="lbl">Keyboard for typed answers</p>
       ${seg("setkb", kbMode(), [["app", "App keyboard"], ["phone", "Phone keyboard"]])}
       <p class="small">The app keyboard is smaller, so the question stays on screen while you type.</p></div>
@@ -3520,12 +4622,16 @@ function openSettings() {
     <div class="set-sec"><p class="lbl">New review cards a day (7 cards = one drug)</p>
       ${seg("setnew", perDay, [[0, "None"], [7, "7"], [14, "14"], [21, "21"]])}</div>
     <div class="set-sec"><p class="lbl">My drugs</p>
-      <p class="small">${mine.length === DRUGS.length ? "All 13 drugs" : mine.length ? mine.map(id => esc(shortName(byId(id)))).join(", ") : "None chosen yet"}</p>
+      <p class="small">${mine.length === DRUGS.length ? `All ${DRUGS.length} drugs` : mine.length ? mine.map(id => esc(shortName(byId(id)))).join(", ") : "None chosen yet"}</p>
       <button class="btn small-btn" id="setDrugs">Choose drugs and order</button></div>
     <div class="set-sec set-danger">
       <div class="row"><button class="link danger" id="setReset">Reset review progress</button><span id="setConfirm" hidden>Are you sure? <button class="btn small-btn" id="setYes">Yes, reset</button> <button class="link" id="setNo">Cancel</button></span></div>
       <p class="small">Clears your review schedule, medals and level on this device. Your streak stays. Progress is saved in this browser only.</p></div>`;
   const refresh = () => { const v = currentView(); if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home(); if (v === "flashcards" && $("#flashcards")._menu && !$(".setup", $("#flashcards")).hidden) $("#flashcards")._menu(); };
+  $$('input[name="setscope"]').forEach(i => i.onchange = () => {
+    if (i.value === "para") { store.set("rv-drugs", [...new Set([...store.get("rv-drugs", EMT_DRUGS.map(d => d.id)), ...PARA_IDS])]); store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]); }
+    setScope(i.value);
+  });
   $$('input[name="setkb"]').forEach(i => i.onchange = () => { kbSwitch(i.value, false); toast(i.value === "app" ? "Typed answers will use the app keyboard." : "Typed answers will use your phone's keyboard."); });
   $$('input[name="setfc"]').forEach(i => i.onchange = () => { store.set("fc-mode", i.value); refresh(); });
   $$('input[name="setgoal"]').forEach(i => i.onchange = () => { daily.goal = +i.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); refresh(); });
@@ -3542,6 +4648,35 @@ function initSettings() {
   $("#setClose").onclick = closeSettings;
   $("#settingsSheet").addEventListener("click", e => { if (e.target.id === "settingsSheet") closeSettings(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+}
+
+/* =============== HOW IT WORKS (the ? button in the header) =============== */
+function openHelp() {
+  $("#helpBody").innerHTML = `
+    <div class="set-sec"><p class="lbl">1 · Start here</p>
+      <p>Add Drug Bag to your home screen first, then always open it from the icon. On iPhones, the home screen app keeps its own progress, separate from Safari.</p>
+      <p>In <b>Flashcards</b>, choose your drugs: <b>Semester 2</b> (methoxyflurane, paracetamol, ibuprofen) or <b>Semester 3</b> (all 13), or <b>Year 3 (Paramedic)</b> for the EMT drugs plus the paramedic-scope medicines. You can add more or change the order any time.</p></div>
+    <div class="set-sec"><p class="lbl">2 · Every day: your spaced review</p>
+      <p>Tap <b>Start review</b> on Home. Each drug has up to 7 cards (indications, contraindications, cautions, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time.</p>
+      <p>Flip the card or type your answer, then rate yourself honestly:</p>
+      <table class="help-rates"><tr><th>Again</th><td>Didn't know it. Back later today and tomorrow.</td></tr><tr><th>Hard</th><td>Patchy or slow. Back sooner.</td></tr><tr><th>Good</th><td>Knew it all. Pushed further out: 1 day, 3 days, then about 7, 18, 45.</td></tr><tr><th>Easy</th><td>Knew it without thinking. Jumps further still.</td></tr></table>
+      <p>Ten minutes a day beats a cram. You can stop any time and your ratings are saved.</p></div>
+    <div class="set-sec"><p class="lbl">3 · Then practise</p>
+      <p><b>Practice deck</b> (in Flashcards), <b>Quiz</b>, <b>Scenarios</b> and the games on Home are extra practice. They never change your review schedule. <b>Drugs</b> has every CPG monograph to look things up. <b>Hot Seat</b> is a group game for tutorials.</p></div>
+    <div class="set-sec"><p class="lbl">4 · Streaks, levels and medals</p>
+      <p>Get 10 correct answers a day to keep your streak. The counter at the top shows your progress. Review cards, the practice deck, the quiz, scenarios and the timed games all count.</p>
+      <p>Your level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
+    <div class="set-sec"><p class="lbl">5 · Handy to know</p>
+      <p>Purple words with a ▶ open a short video. The sliders button holds your settings, including the keyboard. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
+  $("#helpSheet").hidden = false; $("#helpClose").focus();
+}
+function closeHelp() { $("#helpSheet").hidden = true; }
+function initHelp() {
+  const tg = $(".brand p"); if (tg && SCOPE === "para") tg.textContent = "EMT and paramedic medicines in the NZ CPGs";
+  $("#helpBtn").onclick = openHelp;
+  $("#helpClose").onclick = closeHelp;
+  $("#helpSheet").addEventListener("click", e => { if (e.target.id === "helpSheet") closeHelp(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeHelp(); });
 }
 
 </script>
