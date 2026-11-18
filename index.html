@@ -4629,7 +4629,7 @@ function openSettings() {
       <p class="small">Clears your review schedule, medals and level on this device. Your streak stays. Progress is saved in this browser only.</p></div>`;
   const refresh = () => { const v = currentView(); if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home(); if (v === "flashcards" && $("#flashcards")._menu && !$(".setup", $("#flashcards")).hidden) $("#flashcards")._menu(); };
   $$('input[name="setscope"]').forEach(i => i.onchange = () => {
-    if (i.value === "para") { store.set("rv-drugs", [...new Set([...store.get("rv-drugs", EMT_DRUGS.map(d => d.id)), ...PARA_IDS])]); store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]); }
+    if (i.value === "para") { store.set("rv-drugs", [...EMT_DRUGS.map(d => d.id), ...PARA_IDS]); store.set("drugs-chosen", true); store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]); }
     setScope(i.value);
   });
   $$('input[name="setkb"]').forEach(i => i.onchange = () => { kbSwitch(i.value, false); toast(i.value === "app" ? "Typed answers will use the app keyboard." : "Typed answers will use your phone's keyboard."); });
