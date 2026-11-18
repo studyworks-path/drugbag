@@ -3717,6 +3717,20 @@ function secVideo(drugId, sec) {
   return v ? `<a class="vid vid-sec" href="${esc(v.url)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>${esc(v.title || "Watch the video")}</a>` : "";
 }
 function ul(arr) { return `<ul>${arr.map(x => `<li>${escV(typeof x === "string" ? x : x.t)}</li>`).join("")}</ul>`; }
+// a drug only gets a practice card for sections the CPG actually fills (e.g. glucose 10% has no onset or mechanism)
+function hasSection(d, s) {
+  const skip = d.skip || [];
+  switch (s) {
+    case "moa": return !skip.includes("moa") && !!(d.moa && d.moa.length);
+    case "indications": return !!d.indications.length;
+    case "contra": return !skip.includes("contra") && !!d.contra.length;
+    case "cautions": return !skip.includes("caut") && !!d.cautions.length;
+    case "admin": return !!(d.admin && d.admin.length);
+    case "onset": return !skip.includes("onset") && !!d.onset;
+    case "key": return !!(d.keyPoints && d.keyPoints.length);
+    default: return true;
+  }
+}
 function sectionBody(d, s) {
   switch (s) {
     case "moa": return ul(d.moa) + secVideo(d.id, "moa");
@@ -3949,7 +3963,7 @@ function initFlashcards() {
   };
   const practice = (ids, secs) => {
     if (!ids.length || !secs.length) return toast("Pick at least one drug and one section.");
-    let deck = shuffle(ids.flatMap(id => secs.map(s => ({ id, s }))));
+    let deck = shuffle(ids.flatMap(id => secs.filter(s => hasSection(byId(id), s)).map(s => ({ id, s }))));
     const total = deck.length; let known = 0; let flipped = false;
     const play = playArea(); $("#fc-stop").hidden = true;
     const draw = () => {
@@ -4295,7 +4309,7 @@ function initReference() {
 }
 
 /* =============== shell =============== */
-function toast(msg) { const t = $("#toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2400); }
+function toast(msg) { const t = $("#toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), Math.max(2400, msg.length * 45)); }
 const VIEWS = ["review", "flashcards", "quiz", "scenarios", "reference", "games"];
 function show(v) {
   if (!VIEWS.includes(v)) v = "review";
@@ -5281,10 +5295,17 @@ function kbBuild() {
   el.addEventListener("pointerdown", e => {
     const b = e.target.closest(".kb-k"); e.preventDefault(); if (!b) return;
     b.classList.add("down");
-    const k = b.dataset.k; kbPress(k);
+    const k = b.dataset.k;
+    if (k === "phone") { KB.phoneDown = true; return; } // switch on release: iPhones only raise their keyboard from a finished tap
+    kbPress(k);
     if (k === "back") { clearTimeout(KB.rep); KB.rep = setTimeout(function again() { kbPress("back"); KB.rep = setTimeout(again, 60); }, 400); }
   });
-  const up = () => { clearTimeout(KB.rep); $$(".kb-k.down", el).forEach(b => b.classList.remove("down")); };
+  const up = e => {
+    clearTimeout(KB.rep); $$(".kb-k.down", el).forEach(b => b.classList.remove("down"));
+    const onPhone = e.type === "pointerup" && e.target.closest('[data-k="phone"]');
+    if (KB.phoneDown && onPhone) kbPress("phone");
+    KB.phoneDown = false;
+  };
   ["pointerup", "pointercancel", "pointerleave"].forEach(t => el.addEventListener(t, up));
   el.addEventListener("click", e => e.preventDefault());
   KB.el = el;
@@ -5319,7 +5340,7 @@ function kbHide() {
 function kbSwitch(mode, refocus) {
   store.set("kb-mode", mode); KB.on = mode === "app";
   const f = KB.field; kbApply(); kbHide();
-  if (refocus && f) { f.blur(); f.focus(); toast(mode === "app" ? "Using the app keyboard." : "Using your phone's keyboard. You can switch back in Settings on Home."); }
+  if (refocus && f) { f.blur(); f.focus(); toast(mode === "app" ? "Using the app keyboard." : "Using your phone's keyboard. Tap the answer box if it doesn't pop up. Switch back any time in Settings (the sliders button)."); }
 }
 function initKeyboard() {
   kbBuild();
