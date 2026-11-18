@@ -567,6 +567,22 @@ header{flex-wrap:wrap;row-gap:10px}
 .help-rates tr:last-child td{border-bottom:0}
 .help-link{display:block;margin:.6rem auto 0}
 .pill.para{background:color-mix(in srgb,var(--rb-blue) 22%,var(--paper));color:var(--ink)}
+/* practice level */
+.level-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 10px 5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font:700 .85rem system-ui,-apple-system,sans-serif;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.level-badge svg{width:14px;height:14px}
+.level-badge.para{border-color:var(--rb-blue);background:color-mix(in srgb,var(--rb-blue) 12%,var(--paper))}
+.level-badge:hover{border-color:var(--ink)}
+.level-opt{display:grid;gap:4px;width:100%;text-align:left;margin:10px 0;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;cursor:pointer}
+.level-opt.on{border-color:var(--rb-violet);background:color-mix(in srgb,var(--rb-violet) 8%,var(--paper))}
+.level-opt:hover{border-color:var(--ink)}
+.lo-top{display:flex;align-items:center;gap:8px}.lo-top b{font-size:1.1rem}
+.lo-sub{font-weight:700;color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+.lo-lines{font-size:.92rem;line-height:1.4}
+.fc-level{margin:0 0 .6rem}
+.quick-lbl{margin:.2rem 0 .35rem}
+.small-presets{margin-bottom:.9rem}
+.small-presets .small-btn span{font-weight:500;opacity:.75}
+.small-presets .small-btn.on{border-color:var(--rb-violet);background:color-mix(in srgb,var(--rb-violet) 12%,var(--paper))}
 </style>
 </head>
 <body>
@@ -575,6 +591,7 @@ header{flex-wrap:wrap;row-gap:10px}
     <div class="brand">
       <h1><span class="cross" aria-hidden="true">+</span>Drug Bag</h1>
       <p>Every EMT medicine in the NZ CPGs</p>
+      <button class="level-badge" id="levelBtn" aria-haspopup="dialog" title="Change practice level">EMT level</button>
     </div>
     <div class="head-actions"><button class="music-btn help-btn" id="helpBtn" aria-label="How Drug Bag works" title="How it works" aria-haspopup="dialog">?</button><button class="music-btn" id="settingsBtn" aria-label="Settings" title="Settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button><button class="music-btn" id="musicBtn" aria-pressed="true" aria-label="Lobby music" title="Music"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button><div class="streak" id="streak" role="status"></div></div>
   </header>
@@ -609,6 +626,9 @@ header{flex-wrap:wrap;row-gap:10px}
   <div class="share-face score-face" id="scoreFace"><div class="sc-host"><img id="scoreHost" alt=""></div><p class="sc-kicker">Drug Bag · EMT medicines</p><p class="sc-game" id="scoreGame"></p><p class="sc-big" id="scoreNum">0</p><p class="sc-unit" id="scoreUnit"></p>
   <div class="sc-chips"><span class="sc-chip" id="scoreLec"></span><span class="sc-chip" id="scoreCap"></span></div><p class="sc-best" id="scoreBest"></p><span class="sc-new" id="scoreNew" hidden>New personal best!</span><p class="sc-date" id="scoreDate"></p></div>
   <p class="sc-tip">Take a screenshot to show your friends.</p><button class="btn primary" id="scoreDone">Done</button></div></div>
+<div class="levelup" id="levelSheet" hidden><div class="lu-card sheet-card set-card level-card" role="dialog" aria-modal="true" aria-labelledby="levelTitle">
+  <div class="sheet-head"><h2 id="levelTitle">Practice level</h2><button class="link" id="levelClose">Close</button></div>
+  <div id="levelBody"></div></div></div>
 <div class="levelup" id="helpSheet" hidden><div class="lu-card sheet-card set-card help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="sheet-head"><h2 id="helpTitle">How Drug Bag works</h2><button class="link" id="helpClose">Close</button></div>
   <div id="helpBody"></div></div></div>
@@ -2837,6 +2857,663 @@ const PARA_SCENARIOS = [
 ];
 if (SCOPE === "para") SCENARIOS.push(...PARA_SCENARIOS);
 
+/* ---- batch 2 call-outs (Nov 2026): every drug in at least two call-outs ---- */
+const EXTRA_EMT_SCENARIOS = [
+  {
+    id: "e-tramadol", title: "Kidney stone, can't keep still",
+    tags: ["tramadol"],
+    stem: "A 38-year-old man (85 kg) has severe right flank pain from a known kidney stone. Pain 8/10. He's not vomiting and his vital signs are normal. You're an EMT crew and paramedic backup is 30 minutes away. He's had no medicines today.",
+    steps: [
+      { type: "give", prompt: "Oral analgesic for moderate to severe pain while you wait: drug, dose and route?",
+        drug: "tramadol", dose: [[50, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Tramadol 50 mg PO for moderate to severe pain, particularly if an opiate or ketamine is not going to be given." },
+      { type: "choice", prompt: "Next week he calls again. This time he took 50 mg of his own tramadol two hours ago. Can you give more?",
+        options: ["Yes, another 50 mg", "No. Tramadol in the last four hours: only give more if the total within four hours stays within the CPG dose", "Yes, 25 mg", "Only if he vomited it up"],
+        answer: 1,
+        explain: "Tramadol taken within the last four hours is a caution. More may only be given if the total in four hours does not exceed the CPG dose of 50 mg. Withhold if in doubt." }
+    ]
+  },
+  {
+    id: "e-copd-pred", title: "Already on steroids, now wheezy",
+    tags: ["prednisone", "salbutamol", "ipratropium"],
+    stem: "A 72-year-old woman with COPD is wheezy and short of breath after a cold. She can speak in short sentences. She takes prednisone 5 mg every morning and took today's dose.",
+    steps: [
+      { type: "choice", prompt: "You start nebulised salbutamol and ipratropium. What's the driving gas?",
+        options: ["Oxygen at 8 L/min", "Air at 8 L/min, with oxygen by nasal prongs if needed for SpO₂ 88–92%", "Oxygen at 15 L/min", "No driving gas, use an MDI only"],
+        answer: 1,
+        explain: "In COPD, nebulise bronchodilators using air if possible at 8 L/min, with oxygen by nasal prongs if needed to reach SpO₂ 88–92%." },
+      { type: "give", prompt: "She's already had 5 mg of prednisone today. Steroid: drug, dose and route?",
+        drug: "prednisone", dose: [[40, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Her usual 5 mg is lower than the CPG dose, so give an additional full dose: 40 mg PO for an adult. If she's not transported, she should stop her usual prednisone, take the supplied dose, and see her GP within two days." }
+    ]
+  },
+  {
+    id: "e-ad", title: "Pounding headache, injured years ago",
+    tags: ["gtn"],
+    stem: "A 41-year-old man with a T4 spinal cord injury from 12 years ago has a sudden pounding headache, a blocked nose and flushed, sweaty skin above the level of his injury. BP 204/118 (his usual is 100/60), HR 54. He uses a urinary catheter. You're an EMT crew.",
+    steps: [
+      { type: "choice", prompt: "This looks like autonomic dysreflexia. What's the first thing to do?",
+        options: ["Give GTN straight away", "Look for a cause of stimulation and resolve it if possible, starting with his catheter and bladder", "Lie him flat with his legs raised", "Wait 15 minutes and recheck the BP"],
+        answer: 1,
+        explain: "Look for a cause of stimulation and resolve it if possible (CPG EAS 12.1). A blocked or kinked catheter and a full bladder are common causes." },
+      { type: "give", prompt: "You straighten a kinked catheter, but he's still symptomatic with a BP of 192/112. Drug, dose and route?",
+        drug: "gtn", dose: [[0.4, "mg"]], route: ["\\bsl\\b", "sub.?lingual", "under (the )?tongue"],
+        explain: "If he remains symptomatic with a systolic BP above 160 mmHg, or more than 40 mmHg above his normal: GTN 0.4 mg SL every five minutes. The guideline gives an opiate first, but opiates are paramedic scope." },
+      { type: "choice", prompt: "What BP are you aiming for?",
+        options: ["Back to his usual 100/60", "Systolic 140–160 mmHg and diastolic below 110 mmHg", "Systolic below 120 mmHg", "Any drop of 20 mmHg"],
+        answer: 1,
+        explain: "Treat to maintain a systolic BP of 140–160 mmHg and a diastolic BP below 110 mmHg." }
+    ]
+  }
+];
+SCENARIOS.push(...EXTRA_EMT_SCENARIOS);
+
+const PARA_SCENARIOS_2 = [
+  {
+    id: "p-cellulitis", scope: "para", title: "Red, hot and spreading",
+    tags: ["cefazolin"],
+    stem: "A 52-year-old man (90 kg) has a red, hot, spreading area on his shin from a gravel graze. He's alert with normal vital signs and no signs of sepsis. After discussion, he'll see his GP tomorrow rather than go to hospital. No allergies.",
+    steps: [
+      { type: "give", prompt: "He's not being directly referred or transported. What can you give? Drug, dose and route.",
+        drug: "cefazolin", dose: [[1, "g"]], route: ["\\biv\\b", "intraven"],
+        explain: "Cellulitis: a single dose of cefazolin may be given if the patient is not being directly referred (or transported) to a medical facility. 1 g IV over 1–2 minutes, preferably into a running line." },
+      { type: "choice", prompt: "Which history would stop you giving cefazolin?",
+        options: ["Penicillin made him nauseous", "Anaphylaxis to a cephalosporin", "He has diabetes", "Mild kidney impairment"],
+        answer: 1,
+        explain: "The contraindication is a known severe allergy to cephalosporins. Kidney impairment doesn't change the initial dose." }
+    ]
+  },
+  {
+    id: "p-openfx", scope: "para", title: "Bone through the skin",
+    tags: ["cefazolin", "morphine"],
+    stem: "A 29-year-old woman (64 kg) came off her mountain bike on a remote trail. Her lower leg is deformed with bone visible through a wound. She's alert, BP 124/80. The trip to hospital will take over an hour. IV access is in.",
+    steps: [
+      { type: "give", prompt: "Antibiotic for the open fracture: drug, dose and route?",
+        drug: "cefazolin", dose: [[1, "g"]], route: ["\\biv\\b", "intraven"],
+        explain: "Cefazolin is indicated for a compound fracture: 1 g IV for an adult." },
+      { type: "choice", prompt: "Her pain will need managing for over an hour. Which opiate fits best, and how?",
+        options: ["Morphine 1–5 mg IV every five minutes as required", "Morphine 10 mg IV once", "Fentanyl 100 mcg IV every 20 minutes", "Morphine 5–10 mg IM every five minutes"],
+        answer: 0,
+        explain: "Morphine is usually preferred when analgesia is needed for a longer time. IV bolus: 1–5 mg for an adult, repeated every five minutes as required (CPG EAS 1.18)." }
+    ]
+  },
+  {
+    id: "p-dialysis", scope: "para", title: "Dialysis three times a week",
+    tags: ["morphine", "fentanyl"],
+    stem: "A 61-year-old man on haemodialysis for kidney failure slipped in the shower and has a deformed wrist. Pain 8/10. Vital signs are normal. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "Which opiate should you use?",
+        options: ["Morphine, because it lasts longer", "Fentanyl. Morphine is contraindicated in renal failure", "Either, at half the dose", "Neither. Use ketamine first"],
+        answer: 1,
+        explain: "Renal failure is a contraindication to morphine. Fentanyl is usually preferred if the patient has renal impairment." },
+      { type: "choice", prompt: "What IV fentanyl dosing do you use?",
+        options: ["10–50 mcg every five minutes as required", "100 mcg once", "1 mcg/kg every 20 minutes", "50–100 mcg every five minutes"],
+        answer: 0,
+        explain: "IV bolus for analgesia: 10–50 mcg every five minutes for an adult, as required." }
+    ]
+  },
+  {
+    id: "p-adrenal", scope: "para", title: "Vomiting and can't keep her tablets down",
+    tags: ["hydrocortisone", "ondansetron"],
+    stem: "A 34-year-old woman with Addison's disease has been vomiting since last night and couldn't keep her usual steroid tablets down. She is pale and dizzy, BP 86/54. She carries an emergency card. You can't get IV access yet.",
+    steps: [
+      { type: "give", prompt: "She's at risk of adrenal crisis. Drug, dose and route?",
+        drug: "hydrocortisone", dose: [[100, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Hydrocortisone is indicated if the patient is at risk of, or suspected to have, adrenal crisis: 100 mg for an adult. IM: don't dilute further, lateral thigh preferred. Mix by inverting the vial, don't shake it." },
+      { type: "give", prompt: "IV access is now in and she's still vomiting. Antiemetic: drug, dose and route?",
+        drug: "ondansetron", dose: [[8, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Ondansetron 8 mg IV once for an adult (paramedic level), given undiluted." }
+    ]
+  },
+  {
+    id: "p-copd-severe", scope: "para", title: "Blue lips, home oxygen",
+    tags: ["hydrocortisone"],
+    stem: "A 76-year-old man on home oxygen for COPD is tiring, can only speak in single words and has an SpO₂ of 79%. He's drowsy. IV access is in. You've started nebulised bronchodilators.",
+    steps: [
+      { type: "give", prompt: "Severe COPD: steroid, dose and route?",
+        drug: "hydrocortisone", dose: [[100, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Hydrocortisone is indicated for severe COPD or imminent respiratory arrest from COPD: 100 mg for an adult. IV: dilute to about 10 ml with 0.9% sodium chloride and give over 1–2 minutes." },
+      { type: "choice", prompt: "What's the SpO₂ target for him?",
+        options: ["94–98%", "88–92%", "Above 95%", "100%"],
+        answer: 1,
+        explain: "Patients at risk of hypercarbia, including COPD, are given oxygen to an SpO₂ of 88–92% (CPG EAS 1.16 and 2.2)." }
+    ]
+  },
+  {
+    id: "p-ringblock", scope: "para", title: "Finger caught in a car door",
+    tags: ["lignocaine"],
+    stem: "A 25-year-old woman shut her finger in a car door. It's swollen, deformed and very painful, but the skin is intact and clean. She takes no medicines.",
+    steps: [
+      { type: "choice", prompt: "You decide on a digital ring block with 1% lignocaine. How is it given?",
+        options: ["5 ml IV slowly", "About 1–2 ml into the tissue on either side of the web space of the finger", "Into the fingertip pulp", "Topically on the skin"],
+        answer: 1,
+        explain: "Digital ring blocks: about 1–2 ml of 1% lignocaine into the tissue on either side of the web space of the digit. Onset is 5–10 minutes." },
+      { type: "choice", prompt: "Which of these would be a caution for the ring block?",
+        options: ["She takes the oral contraceptive pill", "She takes warfarin", "She's left-handed", "She had a coffee an hour ago"],
+        answer: 1,
+        explain: "Taking an anticoagulant is a caution for ring blocks. Local infection at the site is a contraindication." }
+    ]
+  },
+  {
+    id: "p-io-pain", scope: "para", title: "Shocked, with a needle in his shin",
+    tags: ["lignocaine"],
+    stem: "A 70-year-old man (75 kg) is septic and shocked, and IV access has failed twice. You've placed an IO needle in his tibia. He's conscious and in significant pain when fluid is pushed through it.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route for the IO pain?",
+        drug: "lignocaine", dose: [[50, "mg"]], route: ["\\bio\\b", "intraoss"],
+        explain: "1% lignocaine IO for significant bone pain from IO administration: 50 mg (5 ml) for an adult. Give it slowly over 1–2 minutes." },
+      { type: "choice", prompt: "What do you do after giving it?",
+        options: ["Flush it straight through with a fast fluid bolus", "Wait one more minute before infusing fluid", "Give a second 50 mg dose immediately", "Remove the IO needle"],
+        answer: 1,
+        explain: "Wait one further minute before infusing fluid, to limit the lignocaine flushed into the circulation. The IO dose may be repeated once after 15 minutes." }
+    ]
+  },
+  {
+    id: "p-pci", scope: "para", title: "Forty minutes from the cath lab",
+    tags: ["ticagrelor", "aspirin"],
+    stem: "A 57-year-old man (88 kg) has an anterior STEMI. He's within reach of a PCI centre and is on the primary PCI pathway. He has had aspirin 300 mg. The accepting cardiologist asks you to give ticagrelor.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route?",
+        drug: "ticagrelor", dose: [[180, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Ticagrelor 180 mg PO for an adult, for STEMI on the primary PCI pathway when requested by the accepting clinician. That's two 90 mg tablets." },
+      { type: "choice", prompt: "Which antiplatelet goes with which pathway?",
+        options: ["Clopidogrel with primary PCI, ticagrelor with fibrinolysis", "Ticagrelor with primary PCI, clopidogrel with fibrinolysis", "Both with both", "Neither, aspirin only"],
+        answer: 1,
+        explain: "Ticagrelor is given on the primary PCI pathway when the accepting clinician requests it. Clopidogrel is given in conjunction with fibrinolytic therapy." }
+    ]
+  },
+  {
+    id: "p-stemi-old", scope: "para", title: "Eighty-one and a long way from town",
+    tags: ["tenecteplase", "clopidogrel", "enoxaparin", "ticagrelor"],
+    stem: "An 81-year-old woman (72 kg) who lives independently has an inferior STEMI that started 2 hours ago. She's more than two hours from a PCI centre and is on the fibrinolytic pathway. BP 146/84. No cautions on the checklist.",
+    steps: [
+      { type: "give", prompt: "Fibrinolytic: drug, dose and route?",
+        drug: "tenecteplase", dose: [[20, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Aged 75 or older, 70–79 kg: tenecteplase 20 mg (4 ml) IV, half the under-75 dose." },
+      { type: "give", prompt: "Antiplatelet: drug, dose and route?",
+        drug: "clopidogrel", dose: [[75, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Clopidogrel 75 mg PO for a patient aged 75 or over (300 mg if under 75)." },
+      { type: "choice", prompt: "Which enoxaparin does she get?",
+        options: ["30 mg IV plus 60 mg SC", "No IV dose, 60 mg SC only", "30 mg IV only", "80 mg SC"],
+        answer: 1,
+        explain: "IV enoxaparin is only for patients under 75. SC for 75 or older, 70–79 kg: 60 mg (0.6 ml)." },
+      { type: "choice", prompt: "If she'd been close to a PCI centre instead, and the cardiologist asked for an antiplatelet, which one?",
+        options: ["Clopidogrel 75 mg", "Ticagrelor 180 mg", "Aspirin 600 mg", "Enoxaparin only"],
+        answer: 1,
+        explain: "On the primary PCI pathway, ticagrelor 180 mg PO when requested by the accepting clinician." }
+    ]
+  },
+  {
+    id: "p-hypo-adult", scope: "para", title: "Sweaty and slurring at the bus stop",
+    tags: ["glucose10", "glucagon"],
+    stem: "A 46-year-old man with type 1 diabetes is found sweaty and confused at a bus stop. GCS 10, and he can't swallow safely. His blood glucose is 2.1 mmol/litre.",
+    steps: [
+      { type: "give", prompt: "You get IV access. Drug, dose and route?",
+        drug: "glucose10", dose: [[100, "ml"]], route: ["\\biv\\b", "intraven"],
+        explain: "Hypoglycaemia with a significantly altered level of consciousness or unable to swallow safely: 100 ml of 10% glucose IV for an adult (CPG EAS 5.3)." },
+      { type: "choice", prompt: "If you hadn't been able to get IV access, what would you give?",
+        options: ["Glucose gel into the cheek", "Glucagon 1 mg IM", "Glucagon 0.5 mg IV", "10% glucose IM"],
+        answer: 1,
+        explain: "Give glucagon if unable to gain IV access: 1 mg IM for a patient aged five and over." },
+      { type: "choice", prompt: "Ten minutes later his glucose is 3.2 mmol/litre. What now?",
+        options: ["Repeat glucagon IM", "Give a further dose of glucose and recheck every ten minutes", "Wait and recheck in 30 minutes", "Nothing, he's improving"],
+        answer: 1,
+        explain: "Recheck every ten minutes until consistently above 3.5 mmol/litre, and give further doses of glucose if required. Glucagon IM is not repeated." }
+    ]
+  },
+  {
+    id: "p-hypo-child", scope: "para", title: "Six and very drowsy",
+    tags: ["glucose10"],
+    stem: "A 6-year-old girl (20 kg) with type 1 diabetes is very drowsy and can't swallow safely. Her blood glucose is 1.8 mmol/litre. Her parents say she's been unwell with a tummy bug. You get IV access.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route? (Work out the volume.)",
+        drug: "glucose10", dose: [[40, "ml"]], route: ["\\biv\\b", "intraven"],
+        explain: "10% glucose IV for a child: 2 ml/kg. 2 × 20 kg = 40 ml." },
+      { type: "choice", prompt: "How often do you recheck her glucose?",
+        options: ["Every two minutes", "Every ten minutes until consistently above 3.5 mmol/litre", "Once, at hospital", "Every 30 minutes"],
+        answer: 1,
+        explain: "Repeat the glucose measurement every ten minutes until it is consistently above 3.5 mmol/litre." }
+    ]
+  },
+  {
+    id: "p-vertigo", scope: "para", title: "The room won't stop spinning",
+    tags: ["droperidol"],
+    stem: "A 79-year-old woman (58 kg), who is frail, woke with severe vertigo and has been vomiting. Her neurological examination is otherwise normal. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "Droperidol is indicated for vertigo. What dose for her?",
+        options: ["10 mg IV", "1.25 mg IV", "0.625 mg IV, because a caution is present", "2.5 mg IM"],
+        answer: 2,
+        explain: "Vertigo: 1.25 mg IV/IM for an adult, once only. Consider reducing to 0.625 mg if a caution is present, and aged 75 or over, particularly if frail, is a caution." },
+      { type: "choice", prompt: "How is droperidol prepared for this IV dose?",
+        options: ["Give the 2.5 mg ampoule undiluted", "Dilute 2.5 mg to 4 ml (0.625 mg/ml) and give the dose as a bolus", "Dilute to 10 ml and give over 1–2 minutes", "Add it to a litre of saline"],
+        answer: 1,
+        explain: "For nausea, analgesia, vertigo or headache: dilute 2.5 mg to 4 ml with 0.9% sodium chloride (0.625 mg/ml) and give the dose as an IV bolus." }
+    ]
+  },
+  {
+    id: "p-ketamine-im", scope: "para", title: "Arm trapped in the machinery",
+    tags: ["fentanyl", "ketamine"],
+    stem: "A 42-year-old farmhand (86 kg) has his forearm trapped in a hay baler. Fire crews are working to free him. You can't reach a vein. He's had fentanyl 100 mcg IN 20 minutes ago and another 100 mcg IN just now, and he's still in severe pain.",
+    steps: [
+      { type: "choice", prompt: "How often can IN fentanyl be repeated for an adult?",
+        options: ["Every five minutes", "Every 20 minutes as required", "Once only", "Every hour"],
+        answer: 1,
+        explain: "IN fentanyl for analgesia: 100 mcg for an adult, repeated as required every 20 minutes. Halve the dose if frail or signs of shock." },
+      { type: "give", prompt: "His pain still isn't controlled by the opiate. Without IV access: drug, dose and route? (Round his weight up to the nearest 10 kg.)",
+        drug: "ketamine", dose: [[45, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "86 kg rounds up to 90 kg. 0.5 mg/kg × 90 = 45 mg IM (maximum 50 mg), undiluted into the lateral thigh. It may be repeated once after 20 minutes." }
+    ]
+  },
+  {
+    id: "p-seizure-im", scope: "para", title: "Fitting on the footpath",
+    tags: ["midazolam", "levetiracetam"],
+    stem: "A 30-year-old man has had a generalised seizure for more than five minutes on a footpath. You can't get IV access. His blood glucose is normal.",
+    steps: [
+      { type: "give", prompt: "No IV access. Drug, dose and route?",
+        drug: "midazolam", dose: [[10, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Seizures: midazolam 10 mg IM for an adult if IV access has not been obtained (consider 5 mg if a caution is present). It may be repeated once after ten minutes." },
+      { type: "choice", prompt: "After two IM doses he's still seizing and there's still no IV. Can he have levetiracetam?",
+        options: ["Yes, 2 g IM", "No. Levetiracetam is IV only, never IM", "Yes, 1 g IM", "Yes, IN"],
+        answer: 1,
+        explain: "Levetiracetam is given IV over 5 minutes, preferably into a running line. Do not administer IM." }
+    ]
+  },
+  {
+    id: "p-af-2", scope: "para", title: "Took her own pill an hour ago",
+    tags: ["metoprolol"],
+    stem: "A 70-year-old woman with known paroxysmal AF has palpitations and is light-headed. Her ECG shows AF at about 145/minute with moderate cardiovascular compromise. BP 118/72. She took her own beta blocker an hour ago. She has no asthma, COPD or heart failure.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route?",
+        drug: "metoprolol", dose: [[25, "mg"]], route: ["\\bpo\\b", "oral", "mouth"],
+        explain: "Metoprolol 25 mg PO. Give it as indicated even if the patient has already taken their own beta blocker." },
+      { type: "choice", prompt: "If her BP had been 84/50, what would that mean?",
+        options: ["Give half the dose", "Hypotension is a contraindication, so don't give metoprolol", "Give it with a fluid bolus", "Give it IV instead"],
+        answer: 1,
+        explain: "Hypotension is a contraindication: metoprolol will further reduce the blood pressure." }
+    ]
+  },
+  {
+    id: "p-tca-arrest", scope: "para", title: "Empty blister packs by the bed",
+    tags: ["amiodarone", "adrenaline"],
+    stem: "A 33-year-old woman is in cardiac arrest. Her partner found empty blister packs of her tricyclic antidepressant. The rhythm is VT and she's had three shocks. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "Should she have amiodarone after the third shock?",
+        options: ["Yes, 300 mg IV", "Yes, 150 mg IV", "No. VT from cyclic antidepressant poisoning is a contraindication", "Only after six shocks"],
+        answer: 2,
+        explain: "VT secondary to cyclic antidepressant poisoning is a contraindication: amiodarone can severely worsen shock without resolving the rhythm." },
+      { type: "give", prompt: "Adrenaline during the arrest: drug, dose and route?",
+        drug: "adrenaline", dose: [[1, "mg"]], route: ["\\biv\\b", "intraven"],
+        explain: "Cardiac arrest: adrenaline 1 mg IV every four minutes for an adult (CPG EAS 3.14)." }
+    ]
+  },
+  {
+    id: "p-oversedated", scope: "para", title: "Too much of a good thing",
+    tags: ["naloxone", "fentanyl"],
+    stem: "You've given a 68-year-old man with a fractured hip 150 mcg of fentanyl IV. He's now very drowsy, his respiratory rate is 6, SpO₂ 86%. He takes slow-release morphine every day for chronic back pain.",
+    steps: [
+      { type: "choice", prompt: "Naloxone is indicated for excess adverse effects of opiates. How do you give it IV?",
+        options: ["0.8 mg IV push", "0.1–0.4 mg IV every five minutes, the minimum needed to produce improvement", "2 mg IV once", "0.1 mg IV every 20 minutes"],
+        answer: 1,
+        explain: "Naloxone 0.1–0.4 mg IV every five minutes as required for an adult. Give the minimum dose required to produce improvement." },
+      { type: "choice", prompt: "Why be especially careful with naloxone for him?",
+        options: ["He's over 65", "Chronic opiate use: rapid reversal risks the effects of acute opiate withdrawal", "Naloxone doesn't work on fentanyl", "It interacts with hip fractures"],
+        answer: 1,
+        explain: "Chronic opiate use is a caution: rapid reversal risks adverse effects of opiate withdrawal, including seizures, hypertension, pulmonary oedema or severe agitation." }
+    ]
+  },
+  {
+    id: "p-abd-quetiapine", scope: "para", title: "Took his whole week's tablets",
+    tags: ["olanzapine", "droperidol"],
+    stem: "A 24-year-old man (75 kg) is agitated and pacing, posing a mild to moderate risk to safety. His sister says he took his whole week's supply of quetiapine this afternoon.",
+    steps: [
+      { type: "choice", prompt: "Can he have olanzapine?",
+        options: ["Yes, 10 mg PO", "Yes, 5 mg PO", "No. Poisoning with an antipsychotic is a contraindication", "Only if he asks for it"],
+        answer: 2,
+        explain: "Poisoning with an antipsychotic (for example quetiapine, risperidone or olanzapine) is a contraindication to olanzapine." },
+      { type: "give", prompt: "He needs sedation and won't take tablets. Drug, dose and route?",
+        drug: "droperidol", dose: [[10, "mg"]], route: ["\\bim\\b", "intramusc"],
+        explain: "Droperidol 10 mg IV/IM for acute behavioural disturbance when olanzapine hasn't been given or is ineffective (5 mg if a caution is present). It may be repeated once after 20 minutes." }
+    ]
+  },
+  {
+    id: "p-birth", scope: "para", title: "Baby arrived in the lounge",
+    tags: ["oxytocin"],
+    stem: "A 28-year-old woman has just given birth to a healthy baby at home, before the midwife arrived. It's a single baby. Bleeding is normal so far.",
+    steps: [
+      { type: "choice", prompt: "Oxytocin after a normal birth: dose and route?",
+        options: ["10 units IV over 60 minutes", "10 units IM", "5 units IM", "1 unit IM"],
+        answer: 1,
+        explain: "Following normal birth: oxytocin 10 units IM, undiluted, preferably into the lateral thigh." },
+      { type: "choice", prompt: "If she'd been having twins, when would you give it?",
+        options: ["After the first baby", "After the last baby is delivered", "Before the second baby", "It's contraindicated with twins"],
+        answer: 1,
+        explain: "If multiple babies are present, oxytocin must be given after delivery of the last baby." }
+    ]
+  },
+  {
+    id: "p-urosepsis", scope: "para", title: "Burning, shaking and an hour from town",
+    tags: ["ceftriaxone"],
+    stem: "A 63-year-old woman (70 kg) has had painful urination for three days and is now feverish, shaking and confused. HR 122, BP 92/60. She meets the clinical features for antibiotics in sepsis, and the hospital is an hour away. IV access is in. No allergies.",
+    steps: [
+      { type: "choice", prompt: "Which antibiotic fits this source of sepsis?",
+        options: ["Cefazolin, for any sepsis", "Ceftriaxone, because the source isn't soft tissue or a joint", "No antibiotic until hospital", "Ceftriaxone IM"],
+        answer: 1,
+        explain: "Cefazolin is for sepsis from soft tissue or a joint. Ceftriaxone is for sepsis where cefazolin isn't indicated, aged 12 or over, with features indicating antibiotics and more than 30 minutes to hospital." },
+      { type: "give", prompt: "Drug, dose and route?",
+        drug: "ceftriaxone", dose: [[2, "g"]], route: ["\\biv\\b", "intraven"],
+        explain: "Ceftriaxone 2 g IV for an adult: dissolve in about 4 ml of 0.9% sodium chloride, dilute to 10 ml and give over 1–2 minutes. IM is only for meningococcal septicaemia." }
+    ]
+  },
+  {
+    id: "p-ad", scope: "para", title: "Can't feel it, but his body can",
+    tags: ["fentanyl", "morphine", "gtn"],
+    stem: "A 36-year-old woman with a T6 spinal cord injury has a severe headache and blurred vision. She's flushed above her injury and pale below it. BP 196/120 (her usual is 105/65). Her carer thinks she may have a pressure area. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "After looking for and relieving the cause, which opiate dosing does the guideline use, even though she can't feel pain below her injury?",
+        options: ["Fentanyl 10–50 mcg every five minutes", "Fentanyl 20–30 mcg increments to a total of 100 mcg, or morphine 2–3 mg increments to a total of 10 mg", "Morphine 5–10 mg IM", "No opiate, because she can't feel pain"],
+        answer: 1,
+        explain: "Autonomic dysreflexia: 20–30 mcg increments of fentanyl to a total of 100 mcg, or 2–3 mg increments of morphine to a total of 10 mg, even if the patient cannot feel pain (CPG EAS 12.1)." },
+      { type: "give", prompt: "She's still symptomatic with a systolic BP of 186. Next drug, dose and route?",
+        drug: "gtn", dose: [[0.4, "mg"]], route: ["\\bsl\\b", "sub.?lingual", "under (the )?tongue"],
+        explain: "If symptomatic with a systolic BP above 160 mmHg, or more than 40 mmHg above normal: GTN 0.4 mg SL every five minutes, aiming for a systolic of 140–160 mmHg and a diastolic below 110 mmHg." },
+      { type: "choice", prompt: "Ten minutes after starting GTN her BP is still 184/114. What now?",
+        options: ["Give more fentanyl", "Keep giving GTN and request CCP backup: labetalol IV is the next step", "Stop the GTN", "Give metoprolol 25 mg PO"],
+        answer: 1,
+        explain: "Move to the next step if hypertension isn't controlled within about 10 minutes of starting GTN: continue GTN and give labetalol IV, which is beyond paramedic scope. Request CCP backup if hypertension isn't controlled despite GTN SL." }
+    ]
+  }
+];
+if (SCOPE === "para") SCENARIOS.push(...PARA_SCENARIOS_2);
+
+/* ---- batch 3 call-outs (Nov 2026) ---- */
+const R_SL = ["\\bsl\\b", "sub.?lingual", "under (the )?tongue"], R_IM = ["\\bim\\b", "intramusc"], R_IV = ["\\biv\\b", "intraven"], R_PO = ["\\bpo\\b", "oral", "mouth"], R_NEB = ["nebul"], R_IN = ["\\bin\\b", "intranas", "nasal"];
+SCENARIOS.push(
+  {
+    id: "e-bee-beta", title: "Stung at the orchard",
+    tags: ["adrenaline"],
+    stem: "A 62-year-old orchard worker (80 kg) was stung by a bee 10 minutes ago. He has hives, a hoarse voice and is wheezy, BP 82/50. He takes metoprolol for his blood pressure.",
+    steps: [
+      { type: "give", prompt: "First drug, dose and route?", drug: "adrenaline", dose: [[0.5, "mg"]], route: R_IM,
+        explain: "Anaphylaxis: adrenaline 0.5 mg IM for an adult. Early adrenaline is the most important priority." },
+      { type: "choice", prompt: "Five minutes later his BP is 74/40 and he's getting worse. What now?",
+        options: ["Wait until ten minutes have passed", "Repeat 0.5 mg IM now: every five minutes if deteriorating", "Give loratadine", "Nothing more until backup arrives"],
+        answer: 1,
+        explain: "Repeat IM adrenaline every ten minutes if not improving, or every five minutes if deteriorating." },
+      { type: "choice", prompt: "Why might he need more adrenaline than usual?",
+        options: ["He's over 60", "He takes a beta blocker", "Bee stings need double doses", "He weighs 80 kg"],
+        answer: 1,
+        explain: "Increased doses of adrenaline may be needed if the patient takes a beta blocker or a calcium channel blocker." }
+    ]
+  },
+  {
+    id: "e-prawn-neb", title: "Throat closing after the prawns",
+    tags: ["adrenaline"],
+    stem: "A 30-year-old woman ate prawns 15 minutes ago. She has widespread hives, swollen lips and a marked wheeze, BP 90/56. You've given adrenaline 0.5 mg IM, and ten minutes later her BP and hives are improving, but she is still very wheezy.",
+    steps: [
+      { type: "choice", prompt: "Her systemic signs are improving after IM adrenaline. What else can you consider for the bronchospasm?",
+        options: ["Nebulised adrenaline 5 mg", "Loratadine 20 mg", "Adrenaline 0.5 mg nebulised", "Nothing more"],
+        answer: 0,
+        explain: "Consider 5 mg nebulised adrenaline if there's airway oedema or prominent bronchospasm, once IM adrenaline has been prioritised and systemic signs are improving." },
+      { type: "choice", prompt: "Which of these would mean she should NOT have IM adrenaline?",
+        options: ["Swollen tongue on its own, with no other signs (isolated angioedema)", "Hives with low blood pressure", "Wheeze after a bee sting", "Vomiting and hives after peanuts"],
+        answer: 0,
+        explain: "Isolated angioedema rarely responds to adrenaline and the adverse effects outweigh the benefit, so IM and IV adrenaline are not given. It may respond to nebulised adrenaline." }
+    ]
+  },
+  {
+    id: "e-mdi", title: "Wheezy at the bus stop",
+    tags: ["salbutamol", "ipratropium"],
+    stem: "A 19-year-old with asthma ran for the bus and is now wheezy and short of breath. She can speak in full sentences. Her own inhaler is empty. You have an MDI and spacer.",
+    steps: [
+      { type: "choice", prompt: "How do you give salbutamol by MDI and spacer?",
+        options: ["Two puffs, then hold the breath", "One puff into the spacer, then six breaths, repeated six times", "Ten puffs at once", "One puff every minute for ten minutes"],
+        answer: 1,
+        explain: "One puff into the MDI and spacer, followed by six breaths. Repeat this six times." },
+      { type: "choice", prompt: "She gets worse and you move to nebulisers. How is ipratropium given?",
+        options: ["0.5 mg with every salbutamol nebule", "0.5 mg once only, with the first 5 mg of salbutamol", "1 mg every 20 minutes", "Not in asthma, only COPD"],
+        answer: 1,
+        explain: "Ipratropium 0.5 mg for adults and children, once only. The initial salbutamol dose is combined with ipratropium, but later doses are not." }
+    ]
+  },
+  {
+    id: "e-propranolol", title: "Wheezing, and on heart tablets",
+    tags: ["salbutamol", "adrenaline"],
+    stem: "A 58-year-old woman (65 kg) with asthma is struggling to breathe after a cold. She can only say a few words. She recently started propranolol for her heart. You've given continuous nebulised salbutamol for 15 minutes with no improvement.",
+    steps: [
+      { type: "choice", prompt: "Why might the salbutamol be working poorly?",
+        options: ["Salbutamol doesn't work in women over 50", "It's less effective with a beta blocker, most of all a non-selective one like propranolol", "The nebuliser is too fast", "She needs oxygen as the driving gas"],
+        answer: 1,
+        explain: "Salbutamol is less effective if the patient takes a beta blocker, particularly a non-selective one such as propranolol." },
+      { type: "give", prompt: "Severe asthma, not improving with continuous nebulised salbutamol. Drug, dose and route?", drug: "adrenaline", dose: [[0.5, "mg"]], route: R_IM,
+        explain: "Severe asthma: adrenaline 0.5 mg IM if not improving with continuous nebulised salbutamol. Repeat every 10 minutes if deteriorating." }
+    ]
+  },
+  {
+    id: "e-smoke", title: "Pulled out of a house fire",
+    tags: ["salbutamol"],
+    stem: "A 44-year-old man was pulled from a smoky house fire. He has soot around his nose and mouth, a cough and a marked, prominent wheeze. No asthma history.",
+    steps: [
+      { type: "choice", prompt: "Is salbutamol useful for him?",
+        options: ["No, never after smoke", "It has no significant role for smoke-related bronchospasm, but may be given if bronchospasm is prominent", "Yes, it treats carbon monoxide", "Only by MDI"],
+        answer: 1,
+        explain: "Salbutamol has no significant role in bronchospasm from smoke, toxic gas or chest infection, but may be given if the bronchospasm is prominent." },
+      { type: "give", prompt: "His wheeze is prominent. Drug, dose and route?", drug: "salbutamol", dose: [[5, "mg"]], route: R_NEB,
+        explain: "Nebulised salbutamol 5 mg for adults and children, repeated as required." }
+    ]
+  },
+  {
+    id: "e-crush", title: "Under the car for an hour",
+    tags: ["salbutamol"],
+    stem: "A 36-year-old man was pinned under a car he was repairing for over an hour. The car has just been lifted off his legs. His ECG shows peaked T waves.",
+    steps: [
+      { type: "give", prompt: "Release syndrome with ECG changes. Drug, dose and route?", drug: "salbutamol", dose: [[5, "mg"]], route: R_NEB,
+        explain: "Salbutamol is indicated for release syndrome following crush injury, and for known or suspected hyperkalaemia with ECG changes: 5 mg nebulised for adults and children, repeated as required." },
+      { type: "choice", prompt: "How does salbutamol help here?",
+        options: ["It opens the airways", "It moves potassium back into the cells", "It reduces bleeding", "It treats the pain"],
+        answer: 1,
+        explain: "Salbutamol stimulates beta-2 receptors, which drives potassium into cells and lowers the blood potassium." }
+    ]
+  },
+  {
+    id: "e-ec-aspirin", title: "Swallowed his own tablet",
+    tags: ["aspirin"],
+    stem: "A 66-year-old man has central chest heaviness. Twenty minutes ago he swallowed one of his own 300 mg enteric-coated tablets whole, without chewing. He takes warfarin for atrial fibrillation.",
+    steps: [
+      { type: "choice", prompt: "Does he need more aspirin?",
+        options: ["No, he's already had 300 mg", "Yes: give 300 mg dispersible, because an enteric-coated tablet swallowed whole works slowly", "Yes, 150 mg", "No, he's on warfarin"],
+        answer: 1,
+        explain: "If the patient swallowed 300 mg of enteric-coated aspirin without chewing, give 300 mg dispersible. If they chewed and swallowed 300 mg of any type, give no more." },
+      { type: "choice", prompt: "What about his warfarin?",
+        options: ["Warfarin is a contraindication", "Aspirin is still indicated for clinically significant myocardial ischaemia", "Halve the aspirin", "Ask him to stop his warfarin"],
+        answer: 1,
+        explain: "Aspirin is indicated even if the patient takes warfarin, when they have clinically significant myocardial ischaemia." }
+    ]
+  },
+  {
+    id: "e-nsaid-chest", title: "Chest pain, and anti-inflammatories make her wheeze",
+    tags: ["aspirin", "gtn"],
+    stem: "A 63-year-old woman has crushing central chest pain. BP 148/90, HR 88, no ST elevation. She has asthma and was admitted to hospital last year after taking an anti-inflammatory that made her very wheezy.",
+    steps: [
+      { type: "choice", prompt: "Should she have aspirin?",
+        options: ["Yes, 300 mg", "No. Withhold with a clear history of significant bronchospasm with NSAIDs", "Yes, 150 mg", "Only if she's wheezy now"],
+        answer: 1,
+        explain: "Known worsening of bronchospasm with NSAIDs is a caution: withhold aspirin if there's a clear history of significant bronchospasm with NSAIDs." },
+      { type: "give", prompt: "What can you give for her chest pain? Drug, dose and route.", drug: "gtn", dose: [[0.4, "mg"]], route: R_SL,
+        explain: "Myocardial ischaemia: GTN 0.4 mg SL every five minutes. Her systolic BP is above 110 and her heart rate is between 40 and 150." }
+    ]
+  },
+  {
+    id: "e-fast-slow", title: "Too fast, then too slow",
+    tags: ["gtn"],
+    stem: "Two patients with chest pain on the same shift. The first, aged 54, has a broad-complex tachycardia at 190/minute that looks like VT, BP 120/80. The second, aged 81, has a heart rate of 36, BP 128/70.",
+    steps: [
+      { type: "choice", prompt: "Can the first patient have GTN?",
+        options: ["Yes, 0.4 mg SL", "No. Ventricular tachycardia, and a heart rate over 150, are contraindications", "Yes, at a ten-minute interval", "Only if the pain is severe"],
+        answer: 1,
+        explain: "VT and a heart rate above 150/minute are contraindications. With VT, loss of the atrial kick plus reduced preload risks severe hypotension or cardiac arrest." },
+      { type: "choice", prompt: "Can the second patient have GTN?",
+        options: ["Yes, 0.4 mg SL", "No. A heart rate less than 40/minute is a contraindication", "Yes, 0.8 mg SL", "Yes, because the BP is fine"],
+        answer: 1,
+        explain: "A heart rate less than 40/minute is a contraindication to GTN, as is a systolic BP below 110 mmHg." }
+    ]
+  },
+  {
+    id: "e-rv-stemi", title: "Inferior changes, pressure falling",
+    tags: ["aspirin", "gtn"],
+    stem: "A 70-year-old man has chest pain. The ECG shows ST elevation in the inferior leads, and a right-sided ECG suggests right ventricular involvement. BP 104/62 and falling, and he's pale and clammy. He hasn't had any aspirin.",
+    steps: [
+      { type: "give", prompt: "Antiplatelet: drug, dose and route?", drug: "aspirin", dose: [[300, "mg"]], route: R_PO,
+        explain: "Aspirin 300 mg PO for STEMI or myocardial ischaemia. Dispersible tablets may be chewed or dissolved in water." },
+      { type: "choice", prompt: "What about GTN?",
+        options: ["0.4 mg SL every five minutes", "Withhold: systolic below 110, a right ventricular STEMI and signs of low cardiac output", "0.8 mg SL", "0.4 mg once, then reassess"],
+        answer: 1,
+        explain: "A systolic BP below 110 mmHg is a contraindication. STEMI, especially of the right ventricle, is a caution: left heart filling depends on venous pressure, so withhold GTN if there are signs of low cardiac output." }
+    ]
+  },
+  {
+    id: "e-gastro", title: "Bucket beside the couch",
+    tags: ["ondansetron"],
+    stem: "A 25-year-old man has had gastroenteritis for a day and can't stop vomiting. He's alert. You can't get IV access. You're an EMT crew. No allergies.",
+    steps: [
+      { type: "give", prompt: "Antiemetic: drug, dose and route?", drug: "ondansetron", dose: [[4, "mg"]], route: R_IM,
+        explain: "Ondansetron 4 mg IM for an adult if IV access cannot be obtained. EMTs give IM only." },
+      { type: "choice", prompt: "Twenty minutes later he's still vomiting a lot. Can he have more?",
+        options: ["No, one dose only", "Yes, the IM dose may be repeated once after 20 minutes", "Yes, every 10 minutes", "Only orally"],
+        answer: 1,
+        explain: "The IM dose may be repeated once after 20 minutes if required." },
+      { type: "choice", prompt: "On another job, a vomiting patient is hard to rouse. Is ondansetron useful?",
+        options: ["Yes, it works well", "No. It's rarely effective for vomiting with an altered level of consciousness", "Yes, at double the dose", "Only IV"],
+        answer: 1,
+        explain: "Don't give ondansetron for vomiting associated with an altered level of consciousness: it is rarely effective." }
+    ]
+  },
+  {
+    id: "e-marathon", title: "Collapsed after the half marathon",
+    tags: ["glucagon"],
+    stem: "A 34-year-old woman with type 1 diabetes collapsed after running a half marathon. She's confused and can't swallow safely. Blood glucose 2.4 mmol/litre. You can't get IV access.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route?", drug: "glucagon", dose: [[1, "mg"]], route: R_IM,
+        explain: "Glucagon 1 mg IM once for an adult or child aged five or over, when the patient can't swallow safely and IV access can't be obtained." },
+      { type: "choice", prompt: "Why might glucagon work less well for her today?",
+        options: ["She's too young", "It relies on stored glycogen, which strenuous exercise uses up", "Running raises insulin", "Glucagon doesn't work in type 1 diabetes"],
+        answer: 1,
+        explain: "Glucagon relies on stored glycogen. If glycogen stores are depleted, for example after strenuous exercise, it may be ineffective." },
+      { type: "choice", prompt: "She wakes up. What's important now?",
+        options: ["A second dose of glucagon", "She eats food, because her glycogen stores are now depleted", "Nothing, she's fine", "Insulin"],
+        answer: 1,
+        explain: "After glucagon the patient's glycogen stores are depleted, so it's important that they eat food." }
+    ]
+  }
+);
+
+const PARA_SCENARIOS_3 = [
+  {
+    id: "p-txa-nose", scope: "para", title: "Still pouring after the spray",
+    tags: ["tranexamic", "adrenaline"],
+    stem: "A 72-year-old man on warfarin has a heavy nosebleed from both nostrils. You've given adrenaline IN and held firm pressure for 15 minutes, but it's still bleeding heavily.",
+    steps: [
+      { type: "give", prompt: "Epistaxis not controlled after one dose of adrenaline IN. Drug, dose per nostril and route?", drug: "tranexamic", dose: [[200, "mg"]], route: R_IN,
+        explain: "Tranexamic acid 200 mg (2 ml undiluted) IN per bleeding nostril for a patient aged 12 or over, using a mucosal atomising device with firm pressure." },
+      { type: "choice", prompt: "What was the adrenaline IN dose for him?",
+        options: ["0.5 mg per nostril", "0.2 mg (2 ml of 1:10,000) per bleeding nostril", "1 mg total", "0.1 mg total"],
+        answer: 1,
+        explain: "Epistaxis, aged 12 or over: adrenaline 0.2 mg (2 ml of 1:10,000) IN per bleeding nostril, with firm compression for 15 minutes." }
+    ]
+  },
+  {
+    id: "p-tonsil", scope: "para", title: "Ten days after surgery, spitting blood",
+    tags: ["tranexamic"],
+    stem: "A 24-year-old woman had her tonsils out ten days ago. She's spitting bright red blood. HR 104, BP 118/76. IV access is in.",
+    steps: [
+      { type: "give", prompt: "Drug, dose and route by nebuliser?", drug: "tranexamic", dose: [[500, "mg"]], route: R_NEB,
+        explain: "Bleeding after tonsillectomy: tranexamic acid 500 mg nebulised (undiluted) for an adult or child, repeated once after 30 minutes." },
+      { type: "choice", prompt: "What IV dose could also be given for an adult?",
+        options: ["2 g", "1 g", "500 mg", "200 mg"],
+        answer: 1,
+        explain: "For bleeding after tonsillectomy, 1 g IV for an adult. See the paediatric drug dose tables for a child." }
+    ]
+  },
+  {
+    id: "p-headache", scope: "para", title: "Her usual headache, but much worse",
+    tags: ["droperidol"],
+    stem: "A 38-year-old woman (62 kg) with a long history of migraine has her usual headache, but far more severe. The onset was gradual, her neurological examination is normal, and she's not pregnant. IV access is in.",
+    steps: [
+      { type: "give", prompt: "Primary headache that is severe: drug, dose and route?", drug: "droperidol", dose: [[1.25, "mg"]], route: R_IV,
+        explain: "Primary headache that is severe: droperidol 1.25 mg IV/IM for an adult, once only (consider 0.625 mg if a caution is present)." },
+      { type: "choice", prompt: "If she'd been pregnant, what then?",
+        options: ["Give the same dose", "Droperidol is contraindicated in pregnancy, unless it's for acute behavioural disturbance", "Halve the dose", "Give it IM instead"],
+        answer: 1,
+        explain: "Pregnancy is a contraindication to droperidol, unless it is indicated for acute behavioural disturbance." }
+    ]
+  },
+  {
+    id: "p-chs", scope: "para", title: "Hot showers are the only thing that helps",
+    tags: ["droperidol", "ondansetron"],
+    stem: "A 27-year-old man who uses cannabis daily has had cyclical vomiting for two days. He says only hot showers ease it. He's had ondansetron 8 mg IV with no effect. IV access is in.",
+    steps: [
+      { type: "give", prompt: "Cannabinoid hyperemesis syndrome: drug, dose and route?", drug: "droperidol", dose: [[0.625, "mg"]], route: R_IV,
+        explain: "Droperidol is indicated for nausea and vomiting from cannabinoid hyperemesis syndrome, or that persists despite ondansetron: 0.625 mg IV/IM for an adult, once only." }
+    ]
+  },
+  {
+    id: "p-lastdays", scope: "para", title: "At home with family, final days",
+    tags: ["midazolam", "morphine"],
+    stem: "A 78-year-old woman with advanced cancer is at home in her last days of life, with her whānau around her. She is restless and anxious, and short of breath. She can't swallow. There's no IV access.",
+    steps: [
+      { type: "choice", prompt: "For her agitation or anxiety, what's the first medicine in the guideline?",
+        options: ["Midazolam 1–2 mg IV or 2.5–5 mg IM/SC, with more as required", "Droperidol 10 mg IM", "Olanzapine 10 mg PO", "Ketamine IM"],
+        answer: 0,
+        explain: "Care during the last days of life, agitation or anxiety: midazolam 1–2 mg IV or 2.5–5 mg IM/SC, with additional doses as required. Droperidol 1.25 mg IV or 2.5 mg IM/SC if it doesn't respond." },
+      { type: "choice", prompt: "Which opiate is usually preferred during the last days of life?",
+        options: ["Fentanyl", "Morphine", "Tramadol", "Neither"],
+        answer: 1,
+        explain: "Morphine is usually preferred if the patient needs analgesia for a longer time, or is receiving care during the last days of life." }
+    ]
+  },
+  {
+    id: "p-txa-early", scope: "para", title: "Motorbike versus truck, 40 minutes ago",
+    tags: ["tranexamic", "fentanyl"],
+    stem: "A 22-year-old motorcyclist (70 kg) collided with a truck 40 minutes ago. He has a tender, distended abdomen and a deformed pelvis. HR 132, BP 84/50. IV access is in.",
+    steps: [
+      { type: "give", prompt: "Clinically significant bleeding after trauma. Drug, dose and route?", drug: "tranexamic", dose: [[2, "g"]], route: R_IV,
+        explain: "Bleeding following trauma: tranexamic acid 2 g IV for an adult, over 1–2 minutes. Within three hours of the injury, it's indicated." },
+      { type: "choice", prompt: "What's the time limit for tranexamic acid in trauma?",
+        options: ["One hour", "Three hours from the time of injury", "Six hours", "There isn't one"],
+        answer: 1,
+        explain: "Trauma when tranexamic acid would be given more than three hours after the injury is a contraindication: it appears to increase mortality." }
+    ]
+  },
+  {
+    id: "p-tbi-seizure", scope: "para", title: "Hit his head, then started fitting",
+    tags: ["levetiracetam", "midazolam"],
+    stem: "A 45-year-old man fell from scaffolding and has a severe traumatic brain injury. He had a generalised seizure, which stopped after midazolam 5 mg IV. IV access is in.",
+    steps: [
+      { type: "choice", prompt: "The seizure has stopped. Is levetiracetam still indicated?",
+        options: ["No, only if it starts again", "Yes. Seizure activity with severe TBI is an indication, even if it stopped after midazolam", "Only after two doses of midazolam", "No, it's contraindicated in head injury"],
+        answer: 1,
+        explain: "Levetiracetam is indicated for seizure activity associated with severe TBI, even if it has stopped following midazolam." },
+      { type: "give", prompt: "Drug, dose and route?", drug: "levetiracetam", dose: [[2, "g"]], route: R_IV,
+        explain: "Levetiracetam 2 g IV for an adult, over 5 minutes, preferably into a running line. Never IM." }
+    ]
+  },
+  {
+    id: "p-late-stemi", scope: "para", title: "Chest pain since yesterday afternoon",
+    tags: ["tenecteplase"],
+    stem: "A 69-year-old woman (66 kg) has an anterior STEMI. Her pain started 14 hours ago. She takes rivaroxaban for atrial fibrillation. She's far from a PCI centre.",
+    steps: [
+      { type: "choice", prompt: "Which of her features are cautions for tenecteplase?",
+        options: ["Only her age", "Symptom onset more than 12 hours ago, and taking an anticoagulant", "Her weight", "None, give it"],
+        answer: 1,
+        explain: "Onset more than 12 hours ago and taking an anticoagulant are both cautions on the fibrinolytic checklist." },
+      { type: "choice", prompt: "What do you do with cautions on the fibrinolytic checklist?",
+        options: ["Give half the dose", "Seek clinical advice", "Give it anyway", "Give clopidogrel only"],
+        answer: 1,
+        explain: "If any cautions are present on the fibrinolytic therapy checklist, personnel must seek clinical advice." }
+    ]
+  }
+];
+if (SCOPE === "para") SCENARIOS.push(...PARA_SCENARIOS_3);
+
 </script>
 <script>
 /* ===================== Drug Bag app ===================== */
@@ -3119,6 +3796,9 @@ function initFlashcards() {
     const anyStarted = Object.values(s).some(x => x && x.reps);
     const askDrugs = !store.get("drugs-chosen", false) && !anyStarted;
     const mine = order.filter(id => inc.includes(id)); const notMine = order.filter(id => !inc.includes(id));
+    const sameSet = (x, y) => x.length === y.length && y.every(id => x.includes(id));
+    const curPreset = SCOPE === "para" ? (sameSet(inc, DRUGS.map(d => d.id)) ? "y3" : "")
+      : sameSet(inc, SEM2) ? "s2" : sameSet(inc, EMT_DRUGS.map(d => d.id)) ? "s3" : "";
     const upNext = nextNew ? nextNew.drug.id : null;
     const freshDrug = fresh.length ? shortName(fresh[0].drug) : "";
     root.innerHTML = `
@@ -3141,11 +3821,16 @@ function initFlashcards() {
           : nextNew ? `<button class="btn big-btn" id="fc-review-more">Learn the next drug: ${esc(shortName(nextNew.drug))}</button>` : ""}
       </div>
       <div class="card">
+        <p class="small fc-level">Practice level: <b>${SCOPE === "para" ? "Paramedic" : "EMT"}</b> <button class="link" id="fc-level">Change</button></p>
+        <p class="lbl quick-lbl">Quick pick</p>
+        <div class="preset-row small-presets">${[["s2", "Semester 2", "3 drugs"], ["s3", "Semester 3", `all ${EMT_DRUGS.length}`], ["y3", "Year 3 Paramedic", `${EMT_DRUGS.length + PARA_DRUGS.length} drugs`]].map(([k, l, c]) => {
+          const on = k === curPreset;
+          return `<button class="btn small-btn ${on ? "on" : ""}" data-preset="${k}" aria-pressed="${on}"><b>${l}</b> <span>${c}</span></button>`; }).join("")}</div>
         <div class="picker-head"><span class="lbl">My drugs${mine.length < DRUGS.length ? ` (${mine.length} of ${DRUGS.length})` : ""}</span><button class="link" id="fc-order">${reorder ? "Done" : "Choose drugs and order"}</button></div>
         <div class="stack">${STAGES.map(([k]) => counts[k] ? `<span class="seg ${k}" style="flex:${counts[k]}"></span>` : "").join("")}</div>
         <div class="legend">${STAGES.map(([k, l]) => `<span><i class="seg ${k}"></i>${l} ${counts[k]}</span>`).join("")}</div>
         ${reorder ? `<p class="small order-help">Tick the drugs you're learning and use the arrows to set the order. New cards come one drug at a time, from the top. You can add more drugs any time.</p>
-          <div class="preset-row small-presets"><button class="btn small-btn" data-preset="s2">Semester 2 (3 drugs)</button><button class="btn small-btn" data-preset="s3">Semester 3 (all 13)</button><button class="btn small-btn" data-preset="y3">Year 3 Paramedic (${EMT_DRUGS.length + PARA_DRUGS.length})</button></div>` : ""}
+` : ""}
         ${!reorder && !mine.length ? `<p class="small">No drugs chosen yet. Tap "Choose drugs and order" to pick some.</p>` : ""}
         <ol class="per-drug ordered ${reorder ? "reordering" : ""}">${(reorder ? order : mine).map((id, i) => {
           const d = byId(id); const on = inc.includes(id);
@@ -3173,6 +3858,7 @@ function initFlashcards() {
     const sb = $("#fc-review-start"); if (sb) sb.onclick = () => review(false);
     const mb = $("#fc-review-more"); if (mb) mb.onclick = () => review(true);
     // learning order
+    $("#fc-level").onclick = openLevel;
     $("#fc-order").onclick = () => { reorder = !reorder; menu(); if (reorder) $(".ordered", root).scrollIntoView({ block: "nearest" }); };
     $$("[data-preset]", root).forEach(b => b.onclick = () => {
       const p = b.dataset.preset;
@@ -3584,7 +4270,7 @@ function show(v) {
 }
 document.addEventListener("DOMContentLoaded", () => {
   initOverlays(); initMusic(); initHotSeat();
-  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); initHelp(); renderStreak(); watchLobby();
+  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); initHelp(); initLevel(); renderStreak(); watchLobby();
   $$("nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.v; show(b.dataset.v); });
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== "games") show(h); });
   show(location.hash.slice(1) === "games" ? "review" : location.hash.slice(1));
@@ -4611,7 +5297,7 @@ function openSettings() {
   $("#setBody").innerHTML = `
     <div class="set-sec"><p class="lbl">Practice level</p>
       ${seg("setscope", SCOPE, [["emt", "EMT"], ["para", "Paramedic"]])}
-      <p class="small">Paramedic adds the ${PARA_DRUGS.length} paramedic-scope medicines and the paramedic routes for adrenaline and ondansetron. EMT progress is kept either way.</p></div>
+      <p class="small">Paramedic adds the ${PARA_DRUGS.length} paramedic-scope medicines and the paramedic routes for adrenaline and ondansetron. Your progress is kept either way. You can also switch with the level button under the Drug Bag title.</p></div>
     <div class="set-sec"><p class="lbl">Keyboard for typed answers</p>
       ${seg("setkb", kbMode(), [["app", "App keyboard"], ["phone", "Phone keyboard"]])}
       <p class="small">The app keyboard is smaller, so the question stays on screen while you type.</p></div>
@@ -4628,10 +5314,7 @@ function openSettings() {
       <div class="row"><button class="link danger" id="setReset">Reset review progress</button><span id="setConfirm" hidden>Are you sure? <button class="btn small-btn" id="setYes">Yes, reset</button> <button class="link" id="setNo">Cancel</button></span></div>
       <p class="small">Clears your review schedule, medals and level on this device. Your streak stays. Progress is saved in this browser only.</p></div>`;
   const refresh = () => { const v = currentView(); if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home(); if (v === "flashcards" && $("#flashcards")._menu && !$(".setup", $("#flashcards")).hidden) $("#flashcards")._menu(); };
-  $$('input[name="setscope"]').forEach(i => i.onchange = () => {
-    if (i.value === "para") { store.set("rv-drugs", [...EMT_DRUGS.map(d => d.id), ...PARA_IDS]); store.set("drugs-chosen", true); store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]); }
-    setScope(i.value);
-  });
+  $$('input[name="setscope"]').forEach(i => i.onchange = () => switchLevel(i.value));
   $$('input[name="setkb"]').forEach(i => i.onchange = () => { kbSwitch(i.value, false); toast(i.value === "app" ? "Typed answers will use the app keyboard." : "Typed answers will use your phone's keyboard."); });
   $$('input[name="setfc"]').forEach(i => i.onchange = () => { store.set("fc-mode", i.value); refresh(); });
   $$('input[name="setgoal"]').forEach(i => i.onchange = () => { daily.goal = +i.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); refresh(); });
@@ -4655,19 +5338,22 @@ function openHelp() {
   $("#helpBody").innerHTML = `
     <div class="set-sec"><p class="lbl">1 · Start here</p>
       <p>Add Drug Bag to your home screen first, then always open it from the icon. On iPhones, the home screen app keeps its own progress, separate from Safari.</p>
-      <p>In <b>Flashcards</b>, choose your drugs: <b>Semester 2</b> (methoxyflurane, paracetamol, ibuprofen) or <b>Semester 3</b> (all 13), or <b>Year 3 (Paramedic)</b> for the EMT drugs plus the paramedic-scope medicines. You can add more or change the order any time.</p></div>
+      <p><b>Check your practice level.</b> The button under the Drug Bag title shows it: <b>EMT level</b> or <b>Paramedic level</b>. Tap it to switch.</p>
+      <table class="help-rates"><tr><th>EMT</th><td>Semester 2 and 3. The ${EMT_DRUGS.length} EMT medicines, EMT routes and doses, and the EMT call-outs.</td></tr><tr><th>Paramedic</th><td>Year 3. Everything at EMT level, plus ${PARA_DRUGS.length} paramedic medicines, IV adrenaline in cardiac arrest, IV ondansetron and the paramedic call-outs.</td></tr></table>
+      <p>Switching never loses progress. Your cards are kept at both levels. You can also change level in Settings (the sliders button), or with the <b>Year 3 Paramedic</b> quick pick in Flashcards.</p>
+      <p><b>Then choose your drugs.</b> Open <b>Flashcards</b>. Under <b>Quick pick</b>, tap <b>Semester 2</b> (methoxyflurane, paracetamol, ibuprofen), <b>Semester 3</b> (all 13 EMT drugs) or <b>Year 3 Paramedic</b> (all EMT and paramedic drugs). Your current pick is highlighted. Tap <b>Choose drugs and order</b> to add drugs or change the order you learn them.</p></div>
     <div class="set-sec"><p class="lbl">2 · Every day: your spaced review</p>
       <p>Tap <b>Start review</b> on Home. Each drug has up to 7 cards (indications, contraindications, cautions, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time.</p>
       <p>Flip the card or type your answer, then rate yourself honestly:</p>
       <table class="help-rates"><tr><th>Again</th><td>Didn't know it. Back later today and tomorrow.</td></tr><tr><th>Hard</th><td>Patchy or slow. Back sooner.</td></tr><tr><th>Good</th><td>Knew it all. Pushed further out: 1 day, 3 days, then about 7, 18, 45.</td></tr><tr><th>Easy</th><td>Knew it without thinking. Jumps further still.</td></tr></table>
       <p>Ten minutes a day beats a cram. You can stop any time and your ratings are saved.</p></div>
     <div class="set-sec"><p class="lbl">3 · Then practise</p>
-      <p><b>Practice deck</b> (in Flashcards), <b>Quiz</b>, <b>Scenarios</b> and the games on Home are extra practice. They never change your review schedule. <b>Drugs</b> has every CPG monograph to look things up. <b>Hot Seat</b> is a group game for tutorials.</p></div>
-    <div class="set-sec"><p class="lbl">4 · Streaks, levels and medals</p>
+      <p><b>Practice deck</b> (in Flashcards), <b>Quiz</b>, <b>Scenarios</b> and the games on Home are extra practice. Scenarios shows the call-outs for your practice level, starting with ones that use your drugs (tap <b>All call-outs</b> for the rest). They never change your review schedule. <b>Drugs</b> has every CPG monograph to look things up. <b>Hot Seat</b> is a group game for tutorials.</p></div>
+    <div class="set-sec"><p class="lbl">4 · Streaks, Dose levels and medals</p>
       <p>Get 10 correct answers a day to keep your streak. The counter at the top shows your progress. Review cards, the practice deck, the quiz, scenarios and the timed games all count.</p>
-      <p>Your level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
+      <p>Your Dose level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
     <div class="set-sec"><p class="lbl">5 · Handy to know</p>
-      <p>Purple words with a ▶ open a short video. The sliders button holds your settings, including the keyboard. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
+      <p>Purple words with a ▶ open a short video. The sliders button holds your settings: practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
   $("#helpSheet").hidden = false; $("#helpClose").focus();
 }
 function closeHelp() { $("#helpSheet").hidden = true; }
@@ -4677,6 +5363,40 @@ function initHelp() {
   $("#helpClose").onclick = closeHelp;
   $("#helpSheet").addEventListener("click", e => { if (e.target.id === "helpSheet") closeHelp(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeHelp(); });
+}
+
+/* =============== PRACTICE LEVEL (badge in the header) =============== */
+// Switching keeps every card's progress; the page reloads so the drug list rebuilds.
+function switchLevel(v) {
+  if (v === SCOPE) return closeLevel();
+  if (v === "para") {
+    store.set("rv-drugs", [...EMT_DRUGS.map(d => d.id), ...PARA_IDS]);
+    store.set("learn-order", [...PARA_IDS, ...learnOrder().filter(id => !PARA_IDS.includes(id))]);
+    store.set("drugs-chosen", true);
+  }
+  setScope(v);
+}
+function openLevel() {
+  const card = (v, title, sub, lines) => `<button class="level-opt ${v === SCOPE ? "on" : ""}" data-level="${v}" aria-pressed="${v === SCOPE}">
+      <span class="lo-top"><b>${title}</b>${v === SCOPE ? '<span class="pill new">Current</span>' : ""}</span>
+      <span class="lo-sub">${sub}</span><span class="lo-lines">${lines}</span></button>`;
+  $("#levelBody").innerHTML = `
+    <p class="small">Choose the drugs that match your year. You can switch back at any time, and your progress on every card is kept.</p>
+    ${card("emt", "EMT", "Semester 2 and Semester 3", `The ${EMT_DRUGS.length} EMT medicines, EMT routes and doses, and the EMT call-outs.`)}
+    ${card("para", "Paramedic", "Year 3", `Everything at EMT level, plus ${PARA_DRUGS.length} paramedic medicines, the paramedic routes for adrenaline (IV in cardiac arrest) and ondansetron (IV), and the paramedic call-outs.`)}
+    <p class="small">Semester 2 students: choose EMT, then pick Semester 2 in Flashcards.</p>`;
+  $$("[data-level]", $("#levelBody")).forEach(b => b.onclick = () => switchLevel(b.dataset.level));
+  $("#levelSheet").hidden = false; $("#levelClose").focus();
+}
+function closeLevel() { $("#levelSheet").hidden = true; }
+function initLevel() {
+  const b = $("#levelBtn");
+  b.innerHTML = `<span>${SCOPE === "para" ? "Paramedic" : "EMT"} level</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+  b.classList.toggle("para", SCOPE === "para");
+  b.onclick = openLevel;
+  $("#levelClose").onclick = closeLevel;
+  $("#levelSheet").addEventListener("click", e => { if (e.target.id === "levelSheet") closeLevel(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeLevel(); });
 }
 
 </script>
