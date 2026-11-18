@@ -583,6 +583,13 @@ header{flex-wrap:wrap;row-gap:10px}
 .small-presets{margin-bottom:.9rem}
 .small-presets .small-btn span{font-weight:500;opacity:.75}
 .small-presets .small-btn.on{border-color:var(--rb-violet);background:color-mix(in srgb,var(--rb-violet) 12%,var(--paper))}
+/* route abbreviations */
+.rt{all:unset;cursor:pointer;font-weight:700;color:inherit;text-decoration:underline dotted;text-underline-offset:3px;text-decoration-thickness:1.5px;border-radius:4px}
+.rt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rt-tip{position:absolute;z-index:80;display:grid;gap:2px;padding:10px 12px;border-radius:12px;background:var(--ink);color:var(--paper);font-size:.9rem;line-height:1.35;box-shadow:var(--shadow)}
+.rt-tip b{font-size:.95rem}
+.ref.route-key table.mono{margin:0 16px 8px;width:calc(100% - 32px)}
+.ref.route-key > p.small{margin:0 16px 16px}
 </style>
 </head>
 <body>
@@ -3723,10 +3730,44 @@ function sectionBody(d, s) {
     case "full": return monographHTML(d, true);
   }
 }
+/* route abbreviations: tap one for its meaning; the full key sits at the top of Drugs */
+const ROUTE_NAMES = {
+  IM: ["Intramuscular", "injected into a muscle"], IN: ["Intranasal", "sprayed into the nose with an atomiser"],
+  IO: ["Intraosseous", "into the bone marrow through an IO needle"], IV: ["Intravenous", "into a vein"],
+  SC: ["Subcutaneous", "injected into the fatty layer just under the skin"], SL: ["Sublingual", "under the tongue"],
+  PO: ["Oral", "swallowed (from the Latin per os, by mouth)"], MDI: ["Metered dose inhaler", "a puffer, given through a spacer"],
+  Nebulised: ["Nebulised", "breathed in as a mist through a nebuliser mask"], Inhaled: ["Inhaled", "breathed in through the methoxyflurane inhaler"],
+  Topical: ["Topical", "applied to the skin or wound"]
+};
+const RT_RE = new RegExp(`\\b(${Object.keys(ROUTE_NAMES).join("|")})\\b`, "g");
+const routeAbbr = t => esc(t).replace(RT_RE, m => /^[A-Z]+$/.test(m) ? `<button type="button" class="rt" data-rt="${m}" aria-label="${m}: ${ROUTE_NAMES[m][0]}">${m}</button>` : m);
+function routeKeyHTML() {
+  const used = Object.keys(ROUTE_NAMES).filter(k => DRUGS.some(d => d.routes.some(r => new RegExp(`\\b${k}\\b`).test(r.t))));
+  return `<details class="card ref route-key"><summary><span class="drugname">Route abbreviations</span><span class="routes">What IM, IV, SC and the rest mean</span></summary>
+    <table class="mono compact">${used.map(k => `<tr><th>${k}</th><td><b>${ROUTE_NAMES[k][0]}</b>: ${ROUTE_NAMES[k][1]}</td></tr>`).join("")}</table>
+    <p class="small">Tip: tap any route abbreviation in a drug to see what it means.</p></details>`;
+}
+function initRouteTips() {
+  const tip = document.createElement("div"); tip.className = "rt-tip"; tip.setAttribute("role", "status"); tip.hidden = true; document.body.appendChild(tip);
+  let t = null; const hide = () => { tip.hidden = true; clearTimeout(t); };
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".rt");
+    if (!b) { if (!e.target.closest(".rt-tip")) hide(); return; }
+    e.preventDefault(); e.stopPropagation();
+    const [full, what] = ROUTE_NAMES[b.dataset.rt];
+    tip.innerHTML = `<b>${b.dataset.rt} · ${full}</b><span>${what}</span>`; tip.hidden = false;
+    const r = b.getBoundingClientRect(), w = Math.min(280, window.innerWidth - 24);
+    tip.style.width = w + "px";
+    tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 12)) + window.scrollX + "px";
+    tip.style.top = r.bottom + 8 + window.scrollY + "px";
+    clearTimeout(t); t = setTimeout(hide, 4000);
+  }, true);
+  window.addEventListener("scroll", hide, { passive: true });
+}
 function monographHTML(d, compact) {
   const rows = [
     d.noMonograph ? ["Note", esc(d.noMonograph)] : null,
-    [SCOPE === "para" ? "Route" : "EMT route", d.routes.map(r => r.t).join(", ")],
+    [SCOPE === "para" ? "Route" : "EMT route", d.routes.map(r => routeAbbr(r.t)).join(", ")],
     ["Mechanism", ul(d.moa) + secVideo(d.id, "moa")], ["Indications", ul(d.indications)], d.contra.length ? ["Contraindications", ul(d.contra)] : null, d.cautions.length ? ["Cautions", ul(d.cautions)] : null,
     d.pregnancy ? ["Pregnancy", escV(d.pregnancy)] : null,
     ["Dose", sectionBody(d, "dose")], d.admin ? ["Administration", ul(d.admin)] : null,
@@ -4245,7 +4286,8 @@ function initScenarios() {
 function initReference() {
   const root = $("#reference");
   root.innerHTML = `<input id="ref-search" type="search" placeholder="Search drugs, indications, contraindications…" autocomplete="off">
-    <div class="ref-list">${DRUGS.map(d => `<details class="card ref" data-id="${d.id}"><summary><span class="drugname">${esc(d.name)}</span><span class="routes">${d.routes.map(r => r.t).join(" · ")}</span>${flagHTML(d)}</summary>${noteHTML(d)}${monographHTML(d)}</details>`).join("")}</div>`;
+    ${routeKeyHTML()}
+    <div class="ref-list">${DRUGS.map(d => `<details class="card ref" data-id="${d.id}"><summary><span class="drugname">${esc(d.name)}</span><span class="routes">${d.routes.map(r => routeAbbr(r.t)).join(" · ")}</span>${flagHTML(d)}</summary>${noteHTML(d)}${monographHTML(d)}</details>`).join("")}</div>`;
   $("#ref-search").oninput = e => {
     const q = e.target.value.toLowerCase().trim();
     $$(".ref", root).forEach(el => { el.hidden = q && !el.textContent.toLowerCase().includes(q); });
@@ -4270,7 +4312,7 @@ function show(v) {
 }
 document.addEventListener("DOMContentLoaded", () => {
   initOverlays(); initMusic(); initHotSeat();
-  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); initHelp(); initLevel(); renderStreak(); watchLobby();
+  initReview(); initFlashcards(); initQuiz(); initScenarios(); initReference(); initKeyboard(); initSettings(); initHelp(); initLevel(); initRouteTips(); renderStreak(); watchLobby();
   $$("nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.v; show(b.dataset.v); });
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== "games") show(h); });
   show(location.hash.slice(1) === "games" ? "review" : location.hash.slice(1));
@@ -5353,7 +5395,7 @@ function openHelp() {
       <p>Get 10 correct answers a day to keep your streak. The counter at the top shows your progress. Review cards, the practice deck, the quiz, scenarios and the timed games all count.</p>
       <p>Your Dose level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
     <div class="set-sec"><p class="lbl">5 · Handy to know</p>
-      <p>Purple words with a ▶ open a short video. The sliders button holds your settings: practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
+      <p>Purple words with a ▶ open a short video. Tap a route abbreviation such as IM or SC to see what it means. The full list is at the top of <b>Drugs</b>. The sliders button holds your settings: practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
   $("#helpSheet").hidden = false; $("#helpClose").focus();
 }
 function closeHelp() { $("#helpSheet").hidden = true; }
