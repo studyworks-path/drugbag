@@ -628,6 +628,13 @@ body.dys .ref summary .routes{order:3}
 .say-now{background:color-mix(in srgb,#f5c400 40%,transparent);border-radius:6px;box-shadow:0 0 0 3px color-mix(in srgb,#f5c400 40%,transparent)}
 .spelt{margin:.4rem 0 0;font-weight:700}
 .spelt .chunks{display:inline;font-weight:600;color:var(--muted);margin-left:.4em;letter-spacing:.04em}
+.set-name{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:1.05rem}
+.set-name:focus{outline:none;border-color:var(--accent)}
+.kapai{max-width:calc(100vw - 16px);box-sizing:border-box}
+.kapai.long{font-size:clamp(1.5rem,7.4vw,2.6rem)}
+.kapai.longer{font-size:clamp(1.15rem,5.6vw,2.1rem)}
+.kapai .kp-words{min-width:0}
+.kapai #kapaiText{white-space:normal;text-wrap:balance}
 </style>
 </head>
 <body>
@@ -4182,11 +4189,11 @@ function initReview() {
     const fqMax = Math.max(1, ...fq);
     const lvS = levelStats(); const lvP = levelProgress(lvS); const nextLv = LEVELS[lvS.lv + 1];
     const medals = store.get("medals", {});
-    const sub = st.met ? "Daily goal done. Ka pai!" : st.cur ? `Keep your ${st.cur}-day streak going.` : "Welcome. Happy studying.";
+    const sub = st.met ? `Daily goal done. ${hey("Ka pai!")}` : st.cur ? `Keep your ${st.cur}-day streak going.` : "Welcome. Happy studying.";
     const flame = '<svg class="flame-i" viewBox="0 0 24 28" aria-hidden="true"><path fill="currentColor" d="M12 1c1 4.5 6.5 7.5 6.5 14.2A6.5 6.5 0 0 1 12 22a6.5 6.5 0 0 1-6.5-6.8c0-3 1.5-4.9 3-6.3.3 2 1.2 3.3 2.4 3.9C10.4 9 10.6 4.6 12 1z"/></svg>';
     root.innerHTML = `
       <div class="card hero home-hero">
-        <div class="hero-top"><img class="host-face" src="${HOST_FACE}" alt="Your lecturer"><div class="bubble"><p class="greet-main">Kia ora! Nau mai, haere mai.</p><p class="greet-sub">${sub}</p></div></div>
+        <div class="hero-top"><img class="host-face" src="${HOST_FACE}" alt="Your lecturer"><div class="bubble"><p class="greet-main">${myName() ? `Kia ora ${esc(myName())}! Nau mai, haere mai.` : "Kia ora! Nau mai, haere mai."}</p><p class="greet-sub">${sub}</p></div></div>
         <p class="hero-kicker">Start here · Today's spaced review</p>
         ${n ? `<h2 class="review-main">${n} ${n === 1 ? "card" : "cards"} to review today</h2><p class="small">${due.length} due · ${fresh.length} new${freshDrug ? ` (${esc(freshDrug)}${fresh.some(c => c.drug !== fresh[0].drug) ? " and the next drug" : ""})` : ""}${held ? ` · ${held} more held until tomorrow` : ""}</p>
           <button class="btn primary big-btn" id="rv-start">Start review</button>`
@@ -4609,8 +4616,8 @@ function recordAnswer(counts) {
   if (st > prevBest) daily.best = st;
   saveDaily();
   const newBest = st > prevBest && st >= 2;
-  if (justMet) toast(`Daily goal reached. Streak: ${st} day${st === 1 ? "" : "s"}. Kia pai te rā!`);
-  else if (newBest) toast(`New best streak: ${st} days.`);
+  if (justMet) toast(`${hey("Daily goal reached!")} Streak: ${st} day${st === 1 ? "" : "s"}. Kia pai te rā!`);
+  else if (newBest) toast(`${hey("New best streak!")} ${st} days.`);
   renderStreak(justMet);
   return { justMet, newBest };
 }
@@ -4658,7 +4665,7 @@ function checkMedal(id) {
   const lvl = medalLevel(id);
   if (lvl > (medals[id] || 0)) {
     medals[id] = lvl; store.set("medals", medals);
-    toast(`${MEDAL_NAMES[lvl]} medal: ${byId(id).name}`);
+    toast(`${MEDAL_NAMES[lvl]} medal for ${byId(id).name}. ${hey("Ka pai!")}`);
     return lvl;
   }
   return 0;
@@ -4686,19 +4693,28 @@ function levelProgress(st) {
   return { have: Math.min(st.learned, next.need), need: next.need, txt: `${left} more ${left === 1 ? "card" : "cards"} learned to reach ${next.name}` };
 }
 
+/* ---------------- your name: feedback talks to you ---------------- */
+// first name only, tidied, so it fits in the pop-ups ("Ka pai, Sam!")
+const myName = () => { const n = String(store.get("my-name", "") || "").trim().split(/\s+/)[0] || ""; return n ? (n[0].toUpperCase() + n.slice(1)).slice(0, 16) : ""; };
+// "Ka pai!" → "Ka pai, Sam!"; with no name saved it's unchanged
+const hey = (phrase, n = myName()) => n ? phrase.replace(/[!.]?$/, m => `, ${n}${m || "!"}`) : phrase;
+
 /* ---------------- Ka pai call-outs ---------------- */
 const PRAISE = { ka: "Ka pai!", tino: "Tino pai!", whetu: "Whetū nui!", kaha: "Kia kaha!" };
 function kaPai(tier, text) {
   const el = $("#kapai");
-  $("#kapaiText").textContent = text || PRAISE[tier];
+  $("#kapaiText").textContent = text || hey(PRAISE[tier]);
   $("#kapaiSub").hidden = tier !== "kaha";
+  $("#kapaiSub").textContent = myName() ? `Keep practising, ${myName()}. You've got this.` : "Keep practising, you've got this.";
   const kp = $("#kpArt"); kp.innerHTML = "";
   const thumbs = tier === "whetu" ? 2 : (tier === "ka" || tier === "tino") ? 1 : 0;
   const pic = document.createElement("img"); pic.alt = "";
   pic.src = thumbs === 2 ? POP_TWO : thumbs === 1 ? POP_ONE : HOST_FACE;
   kp.className = "kp-art" + (thumbs ? " photo" : "");
   kp.appendChild(pic);
-  el.classList.remove("show", "ka", "tino", "whetu", "kaha", "has-photo");
+  el.classList.remove("show", "ka", "tino", "whetu", "kaha", "has-photo", "long", "longer");
+  const len = $("#kapaiText").textContent.length;
+  if (len > 17) el.classList.add("longer"); else if (len > 11) el.classList.add("long");
   if (thumbs) el.classList.add("has-photo");
   void el.offsetWidth;
   el.classList.add(tier, "show");
@@ -4722,6 +4738,7 @@ function showLevelUp(name) {
   const k = LEVELS.findIndex(L => L.name === name);
   $("#luArt").innerHTML = LEVEL_ART[Math.max(0, k)];
   $("#luName").textContent = name;
+  $(".lu-sub").textContent = `${hey("Whetū nui!")} Keep going.`;
   $("#levelUp").hidden = false; $("#luOk").focus();
   clearTimeout(luTimer); luTimer = setTimeout(hideLevelUp, 6000);
 }
@@ -5006,7 +5023,7 @@ function ksLose() {
   ksFinish();
   ksPaintMonitor("Asystole · Handover");
   kaPai("kaha");
-  ksFeedback((ks.mode === "timed" ? "Time's up. " : "") + "Handover to the next crew. Kia kaha, you'll get the next one.", "info");
+  ksFeedback((ks.mode === "timed" ? "Time's up. " : "") + `Handover to the next crew. ${hey("Kia kaha.")} You'll get the next one.`, "info");
   if (ks.mode === "timed" && endedRun > 0) { const wasBest = endedRun >= ks.best; setTimeout(() => { if ($("#ksMonitor")) timedCard(endedRun, wasBest); }, 1800); }
 }
 const ksFrac = () => Math.max(0, ks.left) / ks.limit;
@@ -5052,10 +5069,10 @@ function ksPaintClock() {
 }
 function ksClockGot() {
   ks.total++; ks.got.push(ks.item);
-  ksFeedback("Ka pai! +1", "ok");
+  ksFeedback(`${hey("Ka pai!")} +1`, "ok");
   const card = $("#ksCard"); card.classList.remove("flash-ok"); void card.offsetWidth; card.classList.add("flash-ok");
   ks.pos++; ks.done = true; ksPaintClock();
-  setTimeout(() => { if (ks.mode === "clock" && $("#ksClock") && ks.left > 0) { ksShow(); ksFeedback("Ka pai! +1", "ok"); } }, 400);
+  setTimeout(() => { if (ks.mode === "clock" && $("#ksClock") && ks.left > 0) { ksShow(); ksFeedback(`${hey("Ka pai!")} +1`, "ok"); } }, 400);
 }
 function ksEndShift() {
   if (ks.mode !== "clock" || !$("#ksClock")) return;
@@ -5066,7 +5083,7 @@ function ksEndShift() {
   setLobby(true);
   gamesRoot().innerHTML = `<div class="card done">
     <img class="done-pic" src="${AMB}" alt="">
-    <h2>${isBest && ks.total ? "Whetū nui! New best" : ks.total ? "Mahi pai!" : "Time!"}</h2>
+    <h2>${isBest && ks.total ? `${hey("Whetū nui!")} New best` : ks.total ? hey("Mahi pai!") : "Time!"}</h2>
     <p class="hs-score">${plural(ks.total, "answer")}</p>
     <p class="small">${isBest && ks.total ? `That's your best ${ks.sec / 60} min shift for ${pickLabel(ks.pick)} yet.` : `Your best ${ks.sec / 60} min shift for ${pickLabel(ks.pick)}: ${plural(ks.best, "answer")}.`}</p>
     ${missed ? `<div class="g-left"><p class="lbl">The one you were on</p><p><b>${esc(missed.q)}</b></p>${ul(missed.model)}</div>` : ""}
@@ -5324,9 +5341,10 @@ const KB_ROWS = [
 ];
 const kbTouch = () => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } };
 const kbMode = () => store.get("kb-mode", kbTouch() ? "app" : "phone");
-const isKbField = el => !!el && el.matches && el.matches('input[type="text"], input[type="search"], textarea');
+const KB_SEL = 'input[type="text"]:not(.kb-skip), input[type="search"], textarea';
+const isKbField = el => !!el && el.matches && el.matches(KB_SEL);
 function kbApply(root = document) {
-  const fields = root.matches && isKbField(root) ? [root] : $$('input[type="text"], input[type="search"], textarea', root);
+  const fields = root.matches && isKbField(root) ? [root] : $$(KB_SEL, root);
   fields.forEach(f => { if (KB.on) f.setAttribute("inputmode", "none"); else if (f.getAttribute("inputmode") === "none") f.removeAttribute("inputmode"); });
 }
 function kbBuild() {
@@ -5404,6 +5422,9 @@ function openSettings() {
   const perDay = store.get("rv-new2", 7); const mine = myDrugs();
   const seg = (name, cur, opts) => `<div class="seg-row set-seg">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${String(v) === String(cur) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
   $("#setBody").innerHTML = `
+    <div class="set-sec"><p class="lbl"><label for="setname">Your name</label></p>
+      <input type="text" id="setname" class="set-name kb-skip" maxlength="30" autocomplete="given-name" autocapitalize="words" enterkeyhint="done" placeholder="Your first name" value="${esc(store.get("my-name", "") || "")}">
+      <p class="small">Drug Bag uses it to talk to you, like "Ka pai, ${esc(myName() || "Sam")}!". It stays on this phone and isn't sent anywhere.</p></div>
     <div class="set-sec"><p class="lbl">Practice level</p>
       ${seg("setscope", SCOPE, [["emt", "EMT"], ["para", "Paramedic"]])}
       <p class="small">Paramedic adds the ${PARA_DRUGS.length} paramedic-scope medicines and the paramedic routes for adrenaline and ondansetron. Your progress is kept either way. You can also switch with the level button under the Drug Bag title.</p></div>
@@ -5433,6 +5454,13 @@ function openSettings() {
   const refresh = () => { const v = currentView(); if (v === "review" && $("#review")._home && !$("#rv-play")) $("#review")._home(); if (v === "flashcards" && $("#flashcards")._menu && !$(".setup", $("#flashcards")).hidden) $("#flashcards")._menu(); };
   $$('input[name="setscope"]').forEach(i => i.onchange = () => switchLevel(i.value));
   $$('input[name="setkb"]').forEach(i => i.onchange = () => { kbSwitch(i.value, false); toast(i.value === "app" ? "Typed answers will use the app keyboard." : "Typed answers will use your phone's keyboard."); });
+  const nm = $("#setname");
+  const saveName = () => {
+    const before = myName(); store.set("my-name", nm.value.trim());
+    if (myName() !== before) { const rv = $("#review"); if (rv && rv._home && !$("#rv-play")) rv._home(); if (myName()) toast(`Kia ora, ${myName()}!`); }
+  };
+  nm.onchange = saveName; nm.onblur = saveName;
+  nm.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); nm.blur(); } };
   $$('input[name="setread"]').forEach(i => i.onchange = () => {
     const first = i.value === "dys" && !store.get("read-tried", false);
     store.set("read-style", i.value);
@@ -5481,7 +5509,7 @@ function openHelp() {
       <p>Your Dose level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
     <div class="set-sec"><p class="lbl">5 · Handy to know</p>
       <p><b>Easier reading.</b> In Settings (the sliders button), under Reading, you can turn on dyslexia-friendly text: a clearer font, more space between letters and lines, and a cream background. You can choose Lexend or OpenDyslexic. Dyslexia-friendly text also splits long drug names into chunks (on · dan · se · tron), and in call-outs a nearly-right drug name counts, with the right spelling shown. You can also turn on read aloud. It puts a speaker button on questions, answers, call-outs and drug names, highlights each line as it reads, and has a slower speed.</p>
-      <p>Purple words with a ▶ open a short video. Tap a route abbreviation such as IM or SC to see what it means. The full list is at the top of <b>Drugs</b>. The sliders button holds your settings: practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
+      <p>Purple words with a ▶ open a short video. Tap a route abbreviation such as IM or SC to see what it means. The full list is at the top of <b>Drugs</b>. The sliders button holds your settings: your name (so the feedback talks to you), practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
   $("#helpSheet").hidden = false; $("#helpClose").focus();
 }
 function closeHelp() { $("#helpSheet").hidden = true; }
