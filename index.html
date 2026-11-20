@@ -616,6 +616,18 @@ body.dys .app-kb .kb-k{font-family:system-ui,-apple-system,sans-serif!important}
 @keyframes sayPulse{50%{opacity:.25}}
 #rcRes > .say, #qres > .say, .flash .face > .say{float:right;margin:0 0 6px 8px}
 .flash .face > .say{position:relative;z-index:2}
+/* reading: chunks, name speaker, highlight while reading */
+.chunks{display:none}
+body.dys .chunks{display:block;font-size:.85rem;font-weight:600;color:var(--muted);letter-spacing:.06em;margin-top:2px}
+body.dys .ref summary .chunks{flex-basis:100%;order:2}
+body.dys .ref summary .routes{order:3}
+.say.nm{width:30px;height:30px;margin-left:6px;vertical-align:middle}
+.say.nm svg{width:16px;height:16px}
+.pill + .say.nm{margin-left:-2px}
+::highlight(say){background-color:color-mix(in srgb,#f5c400 55%,transparent);color:inherit}
+.say-now{background:color-mix(in srgb,#f5c400 40%,transparent);border-radius:6px;box-shadow:0 0 0 3px color-mix(in srgb,#f5c400 40%,transparent)}
+.spelt{margin:.4rem 0 0;font-weight:700}
+.spelt .chunks{display:inline;font-weight:600;color:var(--muted);margin-left:.4em;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -3672,6 +3684,14 @@ function markDrug(input, id) {
   const d = byId(id); const al = d.aliases.map(squash);
   if (al.includes(s)) return { ok: true };
   const close = al.some(a => a.length > 4 && lev(a, s) <= 2);
+  if (typeof READ !== "undefined" && READ.style() === "dys") {
+    // dyslexia mode: a sound-alike or near spelling counts, and we show the right spelling
+    const snd = w => w.replace(/ph/g, "f").replace(/y/g, "i").replace(/ck|c(?=[aou])|q/g, "k").replace(/(.)\1+/g, "$1").replace(/[aeiou]+/g, "a");
+    let best = null, bd = 99;
+    d.aliases.forEach(a => { const q = squash(a); if (q.length < 5) return; const dist = Math.min(lev(q, s), lev(snd(q), snd(s)) + 0.5); if (dist < bd) { bd = dist; best = a; } });
+    const tol = best && squash(best).length >= 9 ? 3 : 2;
+    if (best && bd <= tol) return { ok: true, near: true, msg: `Nearly. It's spelt ${best.replace(/(^|\s)\S/g, m => m.toUpperCase())}.` };
+  }
   if (close) return { ok: false, msg: "Close, but check your spelling." };
   return { ok: false };
 }
@@ -4006,7 +4026,7 @@ function initFlashcards() {
         <div class="progress"><span style="width:${(known / total) * 100}%"></span></div>
         <p class="meta">Practice deck · ${known} of ${total} known · ${deck.length} left</p>
         <div class="flash" tabindex="0" role="button" aria-label="Flip card">
-          <div class="face front"><div class="drugname">${esc(d.name)}</div><div class="section">${sl}</div>${flagHTML(d)}<p class="hint">Say it out loud, then tap to flip</p></div>
+          <div class="face front"><div class="drugname" data-name="${d.id}">${esc(d.name)}</div>${chunkHTML(d)}<div class="section">${sl}</div>${flagHTML(d)}<p class="hint">Say it out loud, then tap to flip</p></div>
           <div class="face back" hidden><div class="back-title">${esc(d.name)} · ${sl}</div>${sectionBody(d, s)}${noteHTML(d)}</div>
         </div>
         <div class="row actions" hidden><button class="btn again">Again</button><button class="btn primary got">Got it</button></div>
@@ -4040,7 +4060,7 @@ function runQuestions(play, qs, opts) {
       <div class="progress"><span style="width:${(done / total) * 100}%"></span></div>
       <p class="meta">${opts.label ? esc(opts.label) + " · " : ""}${retry ? "Try again" : `Question ${Math.min(done + 1, total)} of ${total}`} · Score ${score}</p>
       <div class="card qcard">
-        <div class="qhead"><span class="pill">${esc(q.kind)}</span><span class="pill ghost">${esc(q.drug.name)}</span>${q.isNew ? '<span class="pill new">New</span>' : ""}${flagHTML(q.drug)}</div>
+        <div class="qhead"><span class="pill">${esc(q.kind)}</span><span class="pill ghost" data-name="${q.drug.id}">${esc(q.drug.name)}</span>${q.isNew ? '<span class="pill new">New</span>' : ""}${flagHTML(q.drug)}</div>
         <h2 class="q">${esc(q.q)}</h2>
         ${isList ? `<textarea id="qa" rows="4" placeholder="Type your answer…" autocomplete="off" spellcheck="false"></textarea>` : `<input id="qa" type="text" placeholder="Type your answer…" autocomplete="off" spellcheck="false">`}
         <div class="row"><button class="btn primary" id="qcheck">Check</button><button class="link" id="qskip">Show answer</button></div>
@@ -4295,9 +4315,9 @@ function initScenarios() {
           f("route").disabled = true;
           const ok = rd.ok && rdo.ok && rr.ok; if (ok) score++;
           praise({ ok, day: recordAnswer(ok), perfect: ok && step === s.steps.length - 1 && score === s.steps.length && s.steps.length >= 2 });
-          const msgs = [rd.msg, rdo.msg].filter(Boolean);
+          const msgs = [rd.near ? null : rd.msg, rdo.msg].filter(Boolean);
           $("[data-check]", wrap).remove();
-          $(".res", wrap).innerHTML = `<div class="verdict ${ok ? "ok" : "no"}">${ok ? "Correct" : "Not quite"}${msgs.length ? ` – ${esc(msgs.join(" "))}` : ""}</div><p class="explain">${escV(st.explain)}</p>`;
+          $(".res", wrap).innerHTML = `<div class="verdict ${ok ? "ok" : "no"}">${ok ? "Correct" : "Not quite"}${msgs.length ? ` – ${esc(msgs.join(" "))}` : ""}</div>${rd.near ? `<p class="spelt">${esc(rd.msg)} <span class="chunks">${esc(chunkText(byId(st.drug)))}</span></p>` : ""}<p class="explain">${escV(st.explain)}</p>`;
           step++; nextStep();
         };
         $("[data-check]", wrap).onclick = check;
@@ -4327,7 +4347,7 @@ function initReference() {
   const root = $("#reference");
   root.innerHTML = `<input id="ref-search" type="search" placeholder="Search drugs, indications, contraindications…" autocomplete="off">
     ${routeKeyHTML()}
-    <div class="ref-list">${DRUGS.map(d => `<details class="card ref" data-id="${d.id}"><summary><span class="drugname">${esc(d.name)}</span><span class="routes">${d.routes.map(r => routeAbbr(r.t)).join(" · ")}</span>${flagHTML(d)}</summary>${noteHTML(d)}${monographHTML(d)}</details>`).join("")}</div>`;
+    <div class="ref-list">${DRUGS.map(d => `<details class="card ref" data-id="${d.id}"><summary><span class="drugname" data-name="${d.id}">${esc(d.name)}</span>${chunkHTML(d)}<span class="routes">${d.routes.map(r => routeAbbr(r.t)).join(" · ")}</span>${flagHTML(d)}</summary>${noteHTML(d)}${monographHTML(d)}</details>`).join("")}</div>`;
   $("#ref-search").oninput = e => {
     const q = e.target.value.toLowerCase().trim();
     $$(".ref", root).forEach(el => { el.hidden = q && !el.textContent.toLowerCase().includes(q); });
@@ -4492,7 +4512,7 @@ function runCards(play, cards, opts) {
       <p class="meta">${retry ? "Try again" : `Card ${Math.min(done + 1, total)} of ${total}`}${queue.length > 1 ? ` · ${queue.length - 1} to go` : ""}</p>
       <div class="card qcard rcard">
         <div class="qhead"><span class="pill">${esc(c.label)}</span>${c.isNew && !retry ? '<span class="pill new">New</span>' : ""}</div>
-        <div class="rc-drug">${esc(d.name)}</div>
+        <div class="rc-drug" data-name="${d.id}">${esc(d.name)}</div>${chunkHTML(d)}
         <h2 class="q">${esc(c.q)}</h2>
         ${c.cover && c.cover.length > 1 ? `<p class="small rc-cover">Cover: ${c.cover.map(esc).join(" · ")}</p>` : ""}
         ${c.hint ? `<p class="small rc-cover">${esc(c.hint)}</p>` : ""}
@@ -5396,7 +5416,8 @@ function openSettings() {
       <p class="small">Dyslexia-friendly text uses a clearer font, more space between letters, words and lines, and a cream background. Try both fonts and keep the one that's easier for you.</p>
       <p class="small set-sub">Read aloud</p>
       ${seg("setaloud", READ.aloud() ? "on" : "off", [["off", "Off"], ["on", "Speaker buttons on"]])}
-      <p class="small">Adds a speaker button to questions, answers and call-outs. Your phone reads them out in its own voice. On an iPhone, turn off silent mode to hear it.</p></div>
+      ${READ.aloud() ? `<p class="small set-sub">Reading speed</p>${seg("setrate", store.get("read-rate", "normal"), [["slow", "Slower"], ["normal", "Normal"], ["fast", "Faster"]])}` : ""}
+      <p class="small">Adds a speaker button to questions, answers, call-outs and drug names. Your phone reads them out in its own voice and highlights each line as it goes. On an iPhone, turn off silent mode to hear it.</p></div>
     <div class="set-sec"><p class="lbl">Flashcard answers</p>
       ${seg("setfc", store.get("fc-mode", "flip"), [["flip", "Flip the card"], ["type", "Type my answer"]])}</div>
     <div class="set-sec"><p class="lbl">Daily goal (correct answers)</p>
@@ -5420,7 +5441,8 @@ function openSettings() {
     toast(i.value === "dys" ? (first ? "Dyslexia-friendly text is on, with read-aloud buttons." : "Dyslexia-friendly text is on.") : "Standard text is back on.");
   });
   $$('input[name="setfont"]').forEach(i => i.onchange = () => { store.set("read-font", i.value); readApply(); });
-  $$('input[name="setaloud"]').forEach(i => i.onchange = () => { store.set("read-aloud", i.value === "on"); readApply(); toast(i.value === "on" ? "Tap a speaker button to hear it read out." : "Read aloud is off."); });
+  $$('input[name="setrate"]').forEach(i => i.onchange = () => { store.set("read-rate", i.value); sayStop(); });
+  $$('input[name="setaloud"]').forEach(i => i.onchange = () => { store.set("read-aloud", i.value === "on"); readApply(); openSettings(); toast(i.value === "on" ? "Tap a speaker button to hear it read out." : "Read aloud is off."); });
   $$('input[name="setfc"]').forEach(i => i.onchange = () => { store.set("fc-mode", i.value); refresh(); });
   $$('input[name="setgoal"]').forEach(i => i.onchange = () => { daily.goal = +i.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); refresh(); });
   $$('input[name="setnew"]').forEach(i => i.onchange = () => { store.set("rv-new2", +i.value); refresh(); });
@@ -5458,7 +5480,7 @@ function openHelp() {
       <p>Get 10 correct answers a day to keep your streak. The counter at the top shows your progress. Review cards, the practice deck, the quiz, scenarios and the timed games all count.</p>
       <p>Your Dose level goes up as you learn cards: Dosebaby, Dosepro (15), Dosechamp (40), Doselegend (75), Dosegoat (all ${ALLQ.length}), then Pharmaphreak (every drug gold). Each drug earns bronze, silver and gold medals.</p></div>
     <div class="set-sec"><p class="lbl">5 · Handy to know</p>
-      <p><b>Easier reading.</b> In Settings (the sliders button), under Reading, you can turn on dyslexia-friendly text: a clearer font, more space between letters and lines, and a cream background. You can choose Lexend or OpenDyslexic. You can also turn on read aloud, which puts a speaker button on questions, answers and call-outs.</p>
+      <p><b>Easier reading.</b> In Settings (the sliders button), under Reading, you can turn on dyslexia-friendly text: a clearer font, more space between letters and lines, and a cream background. You can choose Lexend or OpenDyslexic. Dyslexia-friendly text also splits long drug names into chunks (on · dan · se · tron), and in call-outs a nearly-right drug name counts, with the right spelling shown. You can also turn on read aloud. It puts a speaker button on questions, answers, call-outs and drug names, highlights each line as it reads, and has a slower speed.</p>
       <p>Purple words with a ▶ open a short video. Tap a route abbreviation such as IM or SC to see what it means. The full list is at the top of <b>Drugs</b>. The sliders button holds your settings: practice level, keyboard, flashcard style, daily goal and new cards a day. Your progress is saved on this device only. The answers come from the NZ CPGs (September 2026): if anything looks different from the current CPGs, go with the CPGs and tell your lecturer.</p></div>`;
   $("#helpSheet").hidden = false; $("#helpClose").focus();
 }
@@ -5526,9 +5548,24 @@ function readApply() {
   }
   if (READ.aloud()) sayScan(); else { $$(".say").forEach(b => b.remove()); sayStop(); }
 }
+
+/* ---- drug names: chunks for spelling, and a speaker to hear them ---- */
+const NAME_CHUNKS = {
+  adrenaline: "ad·ren·a·line", aspirin: "as·pi·rin", glucagon: "glu·ca·gon", gtn: "glyc·er·yl tri·ni·trate", ibuprofen: "i·bu·pro·fen",
+  ipratropium: "ip·ra·tro·pi·um", loratadine: "lor·at·a·dine", methoxyflurane: "meth·oxy·flu·rane", ondansetron: "on·dan·se·tron",
+  paracetamol: "par·a·ce·ta·mol", prednisone: "pred·ni·sone, pred·nis·o·lone", salbutamol: "sal·bu·ta·mol", tramadol: "tram·a·dol",
+  amiodarone: "am·i·o·da·rone", cefazolin: "cef·a·zo·lin", ceftriaxone: "cef·tri·ax·one", clopidogrel: "clo·pid·o·grel",
+  droperidol: "dro·per·i·dol", enoxaparin: "e·nox·a·par·in", fentanyl: "fen·ta·nyl", hydrocortisone: "hy·dro·cor·ti·sone",
+  ketamine: "ke·ta·mine", levetiracetam: "lev·e·ti·ra·ce·tam", lignocaine: "lig·no·caine", metoprolol: "me·to·pro·lol tar·trate",
+  midazolam: "mi·daz·o·lam", morphine: "mor·phine", naloxone: "na·lox·one", olanzapine: "o·lan·za·pine", oxytocin: "ox·y·to·cin",
+  tenecteplase: "te·nect·e·plase", ticagrelor: "ti·ca·grel·or", tranexamic: "tran·ex·am·ic ac·id", glucose10: "glu·cose"
+};
+const chunkText = d => (NAME_CHUNKS[d.id] || "").replace(/·/g, " · ");
+const chunkHTML = d => NAME_CHUNKS[d.id] ? `<span class="chunks" aria-hidden="true">${chunkText(d)}</span>` : "";
+const sayName = d => d.name.replace(/\s*\(GTN\)/, "").replace(/\s*\/\s*/g, " or ").replace(/ IV$/, "");
 /* ---- read aloud ---- */
 const SAY_SPOTS = "h2.q, .flash .face, #rcRes, #qres, .scen .stem, .scen .prompt, .scen .explain";
-const SAY_SKIP = "button, .rate-row, .rate-lbl, p.small, .say, .vid-sec, .hint, input, textarea, select";
+const SAY_SKIP = ".chunks, button, .rate-row, .rate-lbl, p.small, .say, .vid-sec, .hint, input, textarea, select";
 const SAY_WORDS = [
   [/(\d)\s*mcg\b/g, "$1 micrograms"], [/(\d)\s*mg\b/g, "$1 milligrams"], [/(\d)\s*g\b/g, "$1 grams"], [/(\d)\s*m[lL]\b/g, "$1 millilitres"],
   [/(\d)\s*L\b/g, "$1 litres"], [/\/kg\b/g, " per kilogram"], [/(\d)\s*kg\b/g, "$1 kilograms"], [/mmHg\b/g, "millimetres of mercury"],
@@ -5537,29 +5574,74 @@ const SAY_WORDS = [
   [/\bGTN\b/g, "G T N"], [/\bCPG\b/g, "C P G"], [/\bEMT\b/g, "E M T"], [/\bCOPD\b/g, "C O P D"], [/\bECG\b/g, "E C G"], [/\bGCS\b/g, "G C S"],
   [/≥/g, " at least "], [/≤/g, " up to "], [/</g, " less than "], [/>/g, " more than "], [/×/g, " times "], [/·/g, ". "], [/(\d)\s*[–-]\s*(\d)/g, "$1 to $2"], [/([A-Za-z])\/([A-Za-z])/g, "$1 or $2"]
 ];
-let sayBtn = null;
-function sayText(el) {
-  const c = el.cloneNode(true); $$(SAY_SKIP, c).forEach(x => x.remove());
-  $$("li, dt, dd, p, div, h2, h3, tr", c).forEach(x => x.append(". "));
-  let t = c.textContent.replace(/\s+/g, " ").replace(/(\.\s*){2,}/g, ". ").trim();
+let sayBtn = null, sayEls = [];
+const RATE = () => ({ slow: 0.75, normal: 0.95, fast: 1.15 })[store.get("read-rate", "normal")] || 0.95;
+function sayClean(t) {
+  t = t.replace(/\s+/g, " ").trim();
   SAY_WORDS.forEach(([re, w]) => { t = t.replace(re, w); });
-  t = t.replace(/(^|[^\d.])1 (milligram|microgram|gram|millilitre|litre|kilogram)s\b/g, "$11 $2");
-  return t;
+  return t.replace(/(^|[^\d.])1 (milligram|microgram|gram|millilitre|litre|kilogram)s\b/g, "$11 $2");
 }
-function sayStop() { try { speechSynthesis.cancel(); } catch (e) {} if (sayBtn) { sayBtn.classList.remove("on"); sayBtn.setAttribute("aria-label", "Read aloud"); } sayBtn = null; }
+// split what's on screen into pieces (each bullet, then each sentence) and keep a Range for each, so it can be highlighted as it's read
+function saySegments(el) {
+  const skip = n => n.parentElement && n.parentElement.closest(SAY_SKIP);
+  const blocks = $$("li, dt, dd, p, .verdict, h2", el).filter(b => !b.closest(SAY_SKIP) && !$("li, dt, dd, p, .verdict", b));
+  const segs = [];
+  (blocks.length ? blocks : [el]).forEach(b => {
+    const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT, { acceptNode: n => skip(n) || !n.nodeValue ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    const nodes = []; let full = ""; let n;
+    while ((n = w.nextNode())) { nodes.push({ n, at: full.length }); full += n.nodeValue; }
+    const re = /[^.!?]+(?:[.!?]+(?=\s|$)|$)/g; let m;
+    // don't split on decimals like 2.5 or e.g.
+    const parts = []; let buf = "", start = 0;
+    while ((m = re.exec(full))) { if (!buf) start = m.index; buf += m[0]; if (/\d\.$/.test(m[0]) && /^\d/.test(full.slice(re.lastIndex)) || /\be\.g\.$|\bi\.e\.$/i.test(buf.trim())) continue; parts.push({ t: buf, s: start, e: start + buf.length }); buf = ""; }
+    if (buf) parts.push({ t: buf, s: start, e: start + buf.length });
+    parts.forEach(p => {
+      const text = sayClean(p.t); if (!text || !/[a-z0-9]/i.test(text)) return;
+      let range = null;
+      try {
+        const pos = off => { let k = nodes.length - 1; while (k > 0 && nodes[k].at > off) k--; return [nodes[k].n, Math.min(off - nodes[k].at, nodes[k].n.nodeValue.length)]; };
+        const lead = p.t.length - p.t.trimStart().length;
+        range = document.createRange(); range.setStart(...pos(p.s + lead)); range.setEnd(...pos(p.e));
+      } catch (e) { range = null; }
+      segs.push({ text, range, block: b });
+    });
+  });
+  return segs;
+}
+function sayMark(seg) {
+  $$(".say-now").forEach(x => x.classList.remove("say-now"));
+  const hl = window.CSS && CSS.highlights && typeof Highlight === "function";
+  if (hl) { CSS.highlights.delete("say"); if (seg && seg.range) CSS.highlights.set("say", new Highlight(seg.range)); }
+  else if (seg) seg.block.classList.add("say-now");
+}
+function sayStop() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  sayMark(null);
+  if (sayBtn) { sayBtn.classList.remove("on"); sayBtn.setAttribute("aria-label", sayBtn.dataset.label || "Read aloud"); }
+  sayBtn = null;
+}
 function sayVoice() {
   const vs = speechSynthesis.getVoices(); const pick = l => vs.find(v => v.lang && v.lang.replace("_", "-").toLowerCase().startsWith(l));
   return pick("en-nz") || pick("en-au") || pick("en-gb") || pick("en");
 }
-function say(el, b) {
+function sayPieces(segs, b, rate) {
   if (sayBtn === b) return sayStop();
   sayStop();
   if (!("speechSynthesis" in window)) return toast("Read aloud doesn't work in this browser.");
-  const u = new SpeechSynthesisUtterance(sayText(el)); const v = sayVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-NZ";
-  u.rate = 0.95; u.onend = u.onerror = () => { if (sayBtn === b) sayStop(); };
+  if (!segs.length) return;
   sayBtn = b; b.classList.add("on"); b.setAttribute("aria-label", "Stop reading");
-  speechSynthesis.speak(u);
+  const v = sayVoice();
+  segs.forEach((seg, k) => {
+    const u = new SpeechSynthesisUtterance(seg.text);
+    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-NZ";
+    u.rate = rate || RATE();
+    u.onstart = () => { if (sayBtn === b) sayMark(seg); };
+    u.onend = u.onerror = () => { if (k === segs.length - 1 && sayBtn === b) sayStop(); };
+    speechSynthesis.speak(u);
+  });
 }
+function say(el, b) { sayPieces(saySegments(el), b); }
+function sayText(el) { return saySegments(el).map(s => s.text).join(" "); }
 const SAY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="w1" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="w2" d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
 function sayScan() {
   if (!READ.aloud()) return;
@@ -5569,6 +5651,14 @@ function sayScan() {
     b.setAttribute("aria-label", "Read aloud"); b.title = "Read aloud";
     b.onclick = e => { e.stopPropagation(); e.preventDefault(); say(el, b); };
     if (el.matches("h2.q, .stem, .prompt, .explain")) el.append(" ", b); else el.prepend(b);
+  });
+  $$("[data-name]").forEach(el => {
+    if ($(":scope > .say", el) || (el.nextElementSibling && el.nextElementSibling.matches(".say.nm"))) return;
+    const d = byId(el.dataset.name); if (!d) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "say nm"; b.innerHTML = SAY_ICON;
+    b.dataset.label = `Hear how to say ${sayName(d)}`; b.setAttribute("aria-label", b.dataset.label); b.title = "Hear the name";
+    b.onclick = e => { e.stopPropagation(); e.preventDefault(); sayPieces([{ text: sayName(d), range: null, block: el }], b, Math.min(RATE(), 0.8)); };
+    el.after(b);
   });
 }
 function initReading() {
