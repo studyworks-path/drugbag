@@ -4640,7 +4640,10 @@ function runCards(play, cards, opts) {
       const vidHTML = secVideo(c.drug.id, c.sec);
       const verdict = skipped ? "Answer" : !need ? "Compare your answer with the CPG" : n >= need ? `You got ${n >= marked.length ? "them all" : n + " of " + need}` : `You got ${n} of ${need}`;
       const r = cardsAll()[c.id];
-      $("#rcRes", play).innerHTML = `${flip ? `<div class="verdict info">CPG answer</div>` : `<div class="verdict ${!need || skipped ? "info" : n >= need ? "ok" : "no"}">${verdict}</div>`}${listHTML}${modelHTML}${vidHTML}
+      // flip mode: show the CPG wording once. The checklist is only for marking typed answers, so it's left out when the CPG text is there.
+      const top = flip ? (modelHTML ? modelHTML : `<div class="verdict info">CPG answer</div>${listHTML}`)
+        : `<div class="verdict ${!need || skipped ? "info" : n >= need ? "ok" : "no"}">${verdict}</div>${listHTML}${modelHTML}`;
+      $("#rcRes", play).innerHTML = `${top}${vidHTML}
         <p class="lbl rate-lbl">How well did you know it?</p>
         <div class="rate-row">${RATINGS.map(([k, l], i) => `<button class="rate ${k} ${k === suggest ? "sug" : ""}" data-r="${k}"><b>${l}</b><span>${retry ? (k === "again" ? "again soon" : "done") : ivText(k === "again" ? 0 : nextIv(r, k))}</span></button>`).join("")}</div>
         <p class="small">${flip ? "Be honest: Good means you'd have said all of it." : `Suggested: <b>${RATINGS.find(x => x[0] === suggest)[1]}</b>.`} Keys 1–4 also work.</p>`;
