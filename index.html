@@ -635,6 +635,8 @@ body.dys .ref summary .routes{order:3}
 .kapai.longer{font-size:clamp(1.15rem,5.6vw,2.1rem)}
 .kapai .kp-words{min-width:0}
 .kapai #kapaiText{white-space:normal;text-wrap:balance}
+#fc-mode-help + .picker-head{margin-top:16px}
+#fc-neworder + p.small{margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -3908,7 +3910,7 @@ function initFlashcards() {
     const curPreset = SCOPE === "para" ? (sameSet(inc, DRUGS.map(d => d.id)) ? "y3" : "")
       : sameSet(inc, SEM2) ? "s2" : sameSet(inc, EMT_DRUGS.map(d => d.id)) ? "s3" : "";
     const upNext = nextNew ? nextNew.drug.id : null;
-    const freshDrug = fresh.length ? shortName(fresh[0].drug) : "";
+    const freshDrug = freshLabel(fresh);
     root.innerHTML = `
     <div class="setup fc-menu">
       <div class="card hero fc-review">
@@ -3925,8 +3927,11 @@ function initFlashcards() {
           <label><input type="radio" name="fcmode" value="type" ${mode === "type" ? "checked" : ""}><span>Type my answer</span></label>
         </div>
         <p class="small" id="fc-mode-help">${MODE_HELP[mode]}</p>
+        <div class="picker-head"><span class="lbl">Which new cards come next?</span></div>
+        <div class="seg-row" id="fc-neworder">${NEW_ORDERS.map(([v, l]) => `<label><input type="radio" name="fcneworder" value="${v}" ${newOrder() === v ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>
+        <p class="small">${NEW_ORDER_HELP[newOrder()]}</p>
         ${askDrugs ? "" : n ? `<button class="btn primary big-btn" id="fc-review-start">Start review</button>`
-          : nextNew ? `<button class="btn big-btn" id="fc-review-more">Learn the next drug: ${esc(shortName(nextNew.drug))}</button>` : ""}
+          : nextNew ? `<button class="btn big-btn" id="fc-review-more">${newOrder() === "mixed" ? "Learn more new cards" : `Learn the next drug: ${esc(shortName(nextNew.drug))}`}</button>` : ""}
       </div>
       <div class="card">
         <p class="small fc-level">Practice level: <b>${SCOPE === "para" ? "Paramedic" : "EMT"}</b> <button class="link" id="fc-level">Change</button></p>
@@ -3937,7 +3942,7 @@ function initFlashcards() {
         <div class="picker-head"><span class="lbl">My drugs${mine.length < DRUGS.length ? ` (${mine.length} of ${DRUGS.length})` : ""}</span><button class="link" id="fc-order">${reorder ? "Done" : "Choose drugs and order"}</button></div>
         <div class="stack">${STAGES.map(([k]) => counts[k] ? `<span class="seg ${k}" style="flex:${counts[k]}"></span>` : "").join("")}</div>
         <div class="legend">${STAGES.map(([k, l]) => `<span><i class="seg ${k}"></i>${l} ${counts[k]}</span>`).join("")}</div>
-        ${reorder ? `<p class="small order-help">Tick the drugs you're learning and use the arrows to set the order. New cards come one drug at a time, from the top. You can add more drugs any time.</p>
+        ${reorder ? `<p class="small order-help">Tick the drugs you're learning and use the arrows to set the order. ${newOrder() === "mine" ? "New cards come one drug at a time, from the top." : `The order is only used when new cards come "In my order". Right now they come as ${newOrder() === "drug" ? "a random drug" : "mixed cards"}.`} You can add more drugs any time.</p>
 ` : ""}
         ${!reorder && !mine.length ? `<p class="small">No drugs chosen yet. Tap "Choose drugs and order" to pick some.</p>` : ""}
         <ol class="per-drug ordered ${reorder ? "reordering" : ""}">${(reorder ? order : mine).map((id, i) => {
@@ -3962,6 +3967,7 @@ function initFlashcards() {
     <div id="fc-play" hidden></div>
     <div class="row center" id="fc-stop" hidden><button class="link" id="fc-stop-btn">← Stop for now</button></div>`;
     // review
+    $("#fc-neworder").onchange = e => { store.set("new-order", e.target.value); menu(); };
     $("#fc-mode").onchange = e => { store.set("fc-mode", e.target.value); $("#fc-mode-help").textContent = MODE_HELP[e.target.value]; };
     const sb = $("#fc-review-start"); if (sb) sb.onclick = () => review(false);
     const mb = $("#fc-review-more"); if (mb) mb.onclick = () => review(true);
@@ -3998,12 +4004,16 @@ function initFlashcards() {
   const review = more => {
     const s = cardsAll(); const q = cardQueue();
     let cards;
-    if (more) { const nx = q.all.filter(c => !s[c.id] || !s[c.id].reps); cards = nx.length ? nx.filter(c => c.drug === nx[0].drug).map(c => Object.assign(c, { isNew: true })) : []; }
+    if (more) {
+      const nx = q.all.filter(c => !s[c.id] || !s[c.id].reps);
+      const pick = newOrder() === "mixed" ? nx.slice(0, Math.max(7, store.get("rv-new2", 7))) : nx.length ? nx.filter(c => c.drug === nx[0].drug) : [];
+      cards = pick.map(c => Object.assign(c, { isNew: true }));
+    }
     else cards = [...q.due, ...q.fresh];
     if (!cards.length) return menu();
     const play = playArea(); $("#fc-stop").hidden = false;
     $("#fc-stop-btn").onclick = menu;
-    const ordered = [...shuffle(cards.filter(c => !c.isNew)), ...cards.filter(c => c.isNew)];
+    const ordered = newOrder() === "mixed" ? shuffle(cards) : [...shuffle(cards.filter(c => !c.isNew)), ...cards.filter(c => c.isNew)];
     runCards(play, ordered, { mode: store.get("fc-mode", "flip"), onDone: ({ good, total }) => {
       const { due, fresh } = cardQueue(); const st = getStreak();
       $("#fc-stop").hidden = true;
@@ -4184,7 +4194,7 @@ function initReview() {
     const upcoming = all.map(c => s[c.id]).filter(x => x && x.reps && x.due > t).map(x => x.due).sort()[0];
     const n = due.length + fresh.length;
     const perDay = store.get("rv-new2", 7);
-    const freshDrug = fresh.length ? shortName(fresh[0].drug) : "";
+    const freshDrug = freshLabel(fresh);
     const fq = Array.from({ length: 7 }, (_, k) => k === 0 ? due.length : all.filter(c => s[c.id] && s[c.id].reps && s[c.id].due === addDays(t, k)).length);
     const fqMax = Math.max(1, ...fq);
     const lvS = levelStats(); const lvP = levelProgress(lvS); const nextLv = LEVELS[lvS.lv + 1];
@@ -4493,8 +4503,31 @@ function rateCard(id, rating) {
 function cardStage(r) { if (!r || !r.reps) return "new"; if (!isLearnedC(r) || r.iv < 7) return "learning"; if (r.iv < 30) return "familiar"; return "mastered"; }
 
 // review queue: due cards (capped) + new cards, one drug at a time
+/* ---- which new cards come next: in my order, a random drug, or mixed cards from any drug ---- */
+const NEW_ORDERS = [["mine", "In my order"], ["drug", "Random drug"], ["mixed", "Mixed cards"]];
+const NEW_ORDER_HELP = {
+  mine: "New cards come one drug at a time, in the order you set.",
+  drug: "New cards come one drug at a time, but the next drug is picked at random. A drug you've started is finished first.",
+  mixed: "New cards come from any of your drugs, all mixed up, and your review cards are shuffled in with them."
+};
+const newOrder = () => store.get("new-order", "mine");
+// a steady "random" number for a key, so the order stays the same all day and changes the next day
+function dayRank(key) { let h = 2166136261; for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function orderNew(all, s) {
+  const mode = newOrder(); if (mode === "mine") return all;
+  const t = dayStr(); const unseen = c => !s[c.id] || !s[c.id].reps;
+  if (mode === "mixed") return [...all.filter(c => !unseen(c)), ...all.filter(unseen).sort((a, b) => dayRank(t + a.id) - dayRank(t + b.id))];
+  const ids = [...new Set(all.map(c => c.drug.id))];
+  const started = id => all.some(c => c.drug.id === id && !unseen(c)) && all.some(c => c.drug.id === id && unseen(c));
+  const order = ids.map((id, i) => [id, started(id) ? -1 : dayRank(t + id), i]).sort((a, b) => (a[1] - b[1]) || (a[2] - b[2])).map(x => x[0]);
+  return order.flatMap(id => all.filter(c => c.drug.id === id));
+}
+function freshLabel(fresh) {
+  const names = [...new Set(fresh.map(c => c.drug.id))].map(id => shortName(byId(id)));
+  return !names.length ? "" : names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.length} drugs`;
+}
 function cardQueue() {
-  const all = buildCards(reviewDeck()); const s = cardsAll(); const t = dayStr();
+  const s = cardsAll(); const all = orderNew(buildCards(reviewDeck()), s); const t = dayStr();
   const due = all.filter(c => s[c.id] && s[c.id].reps && s[c.id].due <= t && s[c.id].seen !== t)
     .sort((a, b) => (s[a.id].due < s[b.id].due ? -1 : 1));
   const ts = todayStats();
@@ -5445,6 +5478,9 @@ function openSettings() {
       ${seg("setgoal", daily.goal, [5, 10, 20, 30].map(v => [v, v]))}</div>
     <div class="set-sec"><p class="lbl">New review cards a day (7 cards = one drug)</p>
       ${seg("setnew", perDay, [[0, "None"], [7, "7"], [14, "14"], [21, "21"]])}</div>
+    <div class="set-sec"><p class="lbl">Which new cards come next?</p>
+      ${seg("setneworder", newOrder(), NEW_ORDERS)}
+      <p class="small">${NEW_ORDER_HELP[newOrder()]}</p></div>
     <div class="set-sec"><p class="lbl">My drugs</p>
       <p class="small">${mine.length === DRUGS.length ? `All ${DRUGS.length} drugs` : mine.length ? mine.map(id => esc(shortName(byId(id)))).join(", ") : "None chosen yet"}</p>
       <button class="btn small-btn" id="setDrugs">Choose drugs and order</button></div>
@@ -5473,6 +5509,7 @@ function openSettings() {
   $$('input[name="setaloud"]').forEach(i => i.onchange = () => { store.set("read-aloud", i.value === "on"); readApply(); openSettings(); toast(i.value === "on" ? "Tap a speaker button to hear it read out." : "Read aloud is off."); });
   $$('input[name="setfc"]').forEach(i => i.onchange = () => { store.set("fc-mode", i.value); refresh(); });
   $$('input[name="setgoal"]').forEach(i => i.onchange = () => { daily.goal = +i.value; const r = dayRec(dayStr()); if (r.n >= daily.goal && !r.met) { r.met = true; daily.days[dayStr()] = r; } saveDaily(); renderStreak(); refresh(); });
+  $$('input[name="setneworder"]').forEach(i => i.onchange = () => { store.set("new-order", i.value); refresh(); openSettings(); });
   $$('input[name="setnew"]').forEach(i => i.onchange = () => { store.set("rv-new2", +i.value); refresh(); });
   $("#setDrugs").onclick = () => { closeSettings(); store.set("drugs-chosen", true); location.hash = "flashcards"; show("flashcards"); $("#flashcards")._editDrugs(); };
   $("#setReset").onclick = () => { $("#setConfirm").hidden = false; };
@@ -5498,7 +5535,7 @@ function openHelp() {
       <p>Switching never loses progress. Your cards are kept at both levels. You can also change level in Settings (the sliders button), or with the <b>Year 3 Paramedic</b> quick pick in Flashcards.</p>
       <p><b>Then choose your drugs.</b> Open <b>Flashcards</b>. Under <b>Quick pick</b>, tap <b>Semester 2</b> (methoxyflurane, paracetamol, ibuprofen), <b>Semester 3</b> (all 13 EMT drugs) or <b>Year 3 Paramedic</b> (all EMT and paramedic drugs). Your current pick is highlighted. Tap <b>Choose drugs and order</b> to add drugs or change the order you learn them.</p></div>
     <div class="set-sec"><p class="lbl">2 · Every day: your spaced review</p>
-      <p>Tap <b>Start review</b> on Home. Each drug has up to 7 cards (indications, contraindications, cautions, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time.</p>
+      <p>Tap <b>Start review</b> on Home. Each drug has up to 7 cards (indications, contraindications, cautions, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time, in your order. To mix things up, choose <b>Random drug</b> (the next drug is picked at random) or <b>Mixed cards</b> (any card from any of your drugs, shuffled together) under "Which new cards come next?" in Flashcards or Settings.</p>
       <p>Flip the card or type your answer, then rate yourself honestly:</p>
       <table class="help-rates"><tr><th>Again</th><td>Didn't know it. Back later today and tomorrow.</td></tr><tr><th>Hard</th><td>Patchy or slow. Back sooner.</td></tr><tr><th>Good</th><td>Knew it all. Pushed further out: 1 day, 3 days, then about 7, 18, 45.</td></tr><tr><th>Easy</th><td>Knew it without thinking. Jumps further still.</td></tr></table>
       <p>Ten minutes a day beats a cram. You can stop any time and your ratings are saved.</p></div>
