@@ -756,11 +756,11 @@ const EMT_DRUGS = [
     ],
     moaKeys: ["alpha|α", "beta|β"],
     indications: [
-      it("Anaphylaxis (IM; nebulised if airway oedema or prominent bronchospasm)", "anaphyla"),
-      it("Severe asthma not improving with nebulised bronchodilators (IM)", "asthma"),
-      it("Stridor causing moderate or severe respiratory distress, including croup (nebulised)", "stridor", "croup"),
-      it("Clinically significant epistaxis (IN)", "epistaxis", "nose ?bleed"),
-      it("Clinically significant bleeding from a wound (topical)", "wound", "topical", "bleed")
+      it("Anaphylaxis", "anaphyla"),
+      it("Severe asthma", "asthma"),
+      it("Stridor causing moderate or severe respiratory distress", "stridor", "croup"),
+      it("IN for clinically significant epistaxis", "epistaxis", "nose ?bleed"),
+      it("Topical for clinically significant bleeding from a wound", "wound", "topical", "bleed")
     ],
     indLabel: "EMT indications",
     contra: NONE,
@@ -826,9 +826,9 @@ const EMT_DRUGS = [
     ],
     contra: [ALLERGY, it("Third trimester of pregnancy", "trimester", "pregnan")],
     cautions: [
-      it("Known bleeding disorder. Increases bleeding risk, but the balance of risk usually favours giving aspirin", "disorder", "haemophil", "hemophil", "coagul"),
-      it("Clinically significant bleeding. The nature and risk of the bleeding must be taken into account", "significant", "active", "haemorrhag", "hemorrhag"),
-      it("Known worsening of bronchospasm with NSAIDs. Withhold if there is a clear history of significant bronchospasm with NSAIDs", "bronchospasm", "nsaid", "asthma")
+      it("Known bleeding disorder. Aspirin will increase the risk of bleeding, however the balance of risk is usually in favour of administering aspirin", "disorder", "haemophil", "hemophil", "coagul"),
+      it("Clinically significant bleeding. Aspirin will increase the risk of bleeding and the nature and risk of the bleeding must be taken into account", "significant", "active", "haemorrhag", "hemorrhag"),
+      it("Known worsening of bronchospasm with NSAIDs. Some patients with asthma or COPD have known worsening of bronchospasm with NSAIDs (including aspirin) and a decision must be made based on the balance of risk. If there is a clear history of significant bronchospasm with NSAIDs, aspirin should be withheld", "bronchospasm", "nsaid", "asthma")
     ],
     pregnancy: "May cause harm (premature delivery, premature closure of the ductus arteriosus in the third trimester). The balance of risk usually favours withholding aspirin in pregnancy. " + BREASTFEED,
     doses: [
@@ -913,18 +913,18 @@ const EMT_DRUGS = [
     routes: [it("SL", "\\bsl\\b", "sub.?lingual", "under (the )?tongue")],
     moa: [
       "GTN is a vasodilator. It acts on vascular smooth muscle to cause venous and arterial vasodilation, with the predominant effect being on veins.",
-      "The mechanism is not clear, but GTN appears to result in the formation of nitric oxide, which is a vasodilator.",
-      "A reduction in venous return (preload) reduces ventricular filling and cardiac output, which reduces myocardial oxygen demand.",
-      "Arterial dilation reduces peripheral resistance (afterload), reducing the force the left ventricle must overcome, which reduces myocardial oxygen demand.",
-      "Dilation of the coronary arteries may increase coronary blood supply, though this is not usually clinically significant."
+      "The mechanism of action is not clear, but it appears that GTN results in the formation of nitric oxide which is a vasodilator. GTN causes:",
+      "A reduction in venous return (preload) to the heart. This reduces ventricular filling and cardiac output which reduces myocardial oxygen demand.",
+      "Arterial dilation which reduces peripheral resistance (afterload). This reduces the force the left ventricle must overcome to eject blood into the arteries which reduces myocardial oxygen demand.",
+      "Dilation of the coronary arteries which may increase coronary blood supply, though this is not usually clinically significant."
     ],
     moaKeys: ["dilat"],
     indications: [
       it("Myocardial ischaemia", "isch", "angina", "\\bacs\\b"),
       it("Cardiogenic pulmonary oedema", "pulmonary o?edema", "\\bcpo\\b", "heart failure"),
       it("Control of hypertension associated with autonomic dysreflexia", "dysreflexia"),
-      it("Control of hypertension (usually with labetalol) prior to fibrinolytic treatment for STEMI", "fibrinoly", "thromboly", "labetalol", "prior"),
-      it("Control of hypertension (usually with labetalol) during inter-hospital transfer for STEMI", "transfer", "inter.?hospital"),
+      it("Control of hypertension (usually in conjunction with labetalol) prior to fibrinolytic treatment for STEMI", "fibrinoly", "thromboly", "labetalol", "prior"),
+      it("Control of hypertension (usually in conjunction with labetalol) during inter-hospital transfer for STEMI", "transfer", "inter.?hospital"),
       it("STEMI", "(^|[^n])stemi")
     ],
     indNeed: 4,
@@ -936,12 +936,12 @@ const EMT_DRUGS = [
       it("Ventricular tachycardia", "\\bvt\\b", "ventricular tach")
     ],
     cautions: [
-      it("STEMI, particularly STEMI involving the right ventricle. Withhold if there are signs of low cardiac output", "(^|[^n])stemi", "right ventric", "\\brv\\b"),
+      it("STEMI, particularly STEMI involving the right ventricle. GTN may cause a significant fall in cardiac output and if there are signs of low cardiac output GTN should be withheld", "(^|[^n])stemi", "right ventric", "\\brv\\b"),
       it("The patient is frail", "frail", "elderly"),
-      it("Signs of shock", "shock"),
-      it("Dysrhythmia", "dysrhythm", "arrhythm"),
-      it("Has taken a phosphodiesterase inhibitor in the last 24 hours (e.g. sildenafil)", "phospho", "pde", "sildenafil", "tadalafil", "viagra", "cialis", "erectile"),
-      it("Known aortic or mitral stenosis", "stenosis")
+      it("Signs of shock. The patient's reduced cardiac output may fall further with GTN administration", "shock"),
+      it("Dysrhythmia. This may cause a reduced cardiac output which may fall further with GTN administration", "dysrhythm", "arrhythm"),
+      it("Has taken a phosphodiesterase inhibitor in the last 24 hours. See common interactions", "phospho", "pde", "sildenafil", "tadalafil", "viagra", "cialis", "erectile"),
+      it("Known aortic or mitral stenosis. With aortic or mitral stenosis, cardiac output may be reduced as a result of the narrowed valve and a fall in preload may cause a further fall in cardiac output", "stenosis")
     ],
     pregnancy: "Safety has not been demonstrated. The likelihood of needing GTN is very low, but GTN should be administered if indicated.",
     doses: [
@@ -990,13 +990,13 @@ const EMT_DRUGS = [
     contra: [
       ALLERGY,
       it("Pregnancy", "pregnan"),
-      it("The presence of sepsis, dehydration, shock or clinically significant bleeding", "seps", "dehydrat", "shock", "bleed"),
-      it("Known worsening of bronchospasm with NSAIDs", "bronchospasm", "nsaid", "asthma")
+      it("The presence of sepsis, dehydration, shock or clinically significant bleeding. Ibuprofen can worsen renal impairment and increase the risk of bleeding", "seps", "dehydrat", "shock", "bleed"),
+      it("Known worsening of bronchospasm with NSAIDs. Some patients with asthma or COPD have known worsening of bronchospasm with NSAIDs. If there is a clear history of significant bronchospasm with NSAIDs, ibuprofen must not be administered", "bronchospasm", "nsaid", "asthma")
     ],
     cautions: [
-      it("Ibuprofen taken within the last four hours. More may be given only if the total within four hours does not exceed the CPG dose. Withhold if in doubt", "4 ?h", "four", "recent", "already"),
-      it("Abdominal pain, particularly if the patient is very unwell or vomiting", "abdom"),
-      it("Age ≥ 75 years, particularly if frail (renal impairment is likely)", "75", "elderly", "older", "frail")
+      it("The patient has taken ibuprofen within the last four hours. Ibuprofen is contained in many products such as cold and flu tablets/drinks, combination analgesics and migraine tablets. Additional ibuprofen may be administered provided it is clear that the total dose taken within a four hour period does not exceed the dose described within the CPGs. Withhold ibuprofen if there is any doubt", "4 ?h", "four", "recent", "already"),
+      it("Abdominal pain, particularly if the patient is very unwell or vomiting. Clinical judgement is required, but if the patient is very unwell or vomiting the possibility of significant intra-abdominal pathology exists and oral medicines should usually be withheld", "abdom"),
+      it("Age greater than or equal to 75 years, particularly if frail. In this setting, renal impairment is likely and ibuprofen may worsen renal impairment", "75", "elderly", "older", "frail")
     ],
     pregnancy: "May cause foetal harm and should not be administered (premature delivery and premature closure of the ductus arteriosus). " + BREASTFEED,
     doses: [
@@ -1111,11 +1111,11 @@ const EMT_DRUGS = [
       ALLERGY,
       it("Personal or family history of malignant hyperthermia", "malignant", "hypertherm"),
       it("Known renal impairment", "renal", "kidney"),
-      it("15 ml methoxyflurane (5 doses) administered within the last week", "15", "(5|five) ?doses")
+      it("15 ml methoxyflurane (5 doses) administered within the last week. Frequent administration increases the risk of renal impairment", "15", "(5|five) ?doses")
     ],
     cautions: [
-      it("Age ≥ 75 years, particularly if frail", "75", "frail", "elderly"),
-      it("Pre-eclampsia (renal impairment is likely)", "eclamp"),
+      it("Age greater than or equal to 75 years, particularly if frail", "75", "frail", "elderly"),
+      it("Pre-eclampsia. In this setting, renal impairment is likely and methoxyflurane may worsen renal impairment", "eclamp"),
       it("Administration within a confined space", "confined", "enclosed"),
       it("Acute exacerbation of chronic pain", "chronic")
     ],
@@ -1192,17 +1192,19 @@ const EMT_DRUGS = [
     ref: "EAS 14.37",
     src: "current",
     routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
-    moa: ["Paracetamol is an analgesic and antipyretic."],
-    moaKeys: ["analges|antipyret|pain"],
+    moa: [
+      "Paracetamol inhibits the production of prostaglandins resulting in a reduction in pain and fever."
+    ],
+    moaKeys: ["prostaglandin"],
     indications: [
       it("Mild or moderate pain", "mild", "moderate pain"),
       it("Moderate to severe pain, in addition to other medicines", "severe", "addition", "other")
     ],
     contra: [ALLERGY],
     cautions: [
-      it("Paracetamol taken within the last four hours. More may be given only if the total within four hours does not exceed the CPG dose. Withhold if in doubt", "4 ?h", "four", "recent", "already"),
-      it("Abdominal pain, particularly if the patient is very unwell or vomiting", "abdom"),
-      it("Known severe liver disease", "liver", "hepat")
+      it("The patient has taken paracetamol within the last four hours. Paracetamol is contained in many products such as cold and flu tablets/drinks, cough mixtures, combination pain relievers and migraine tablets. Additional paracetamol may be administered provided it is clear that the total dose taken within a four hour period does not exceed the dose described within the CPGs. Withhold paracetamol if there is any doubt", "4 ?h", "four", "recent", "already"),
+      it("Abdominal pain, particularly if the patient is very unwell or vomiting. Clinical judgement is required, but if the patient is very unwell or vomiting, the possibility of significant intra-abdominal pathology exists and oral medicines should usually be withheld", "abdom"),
+      it("Known severe liver disease. Liver disease must be severely impaired before paracetamol clearance is altered, but the balance of risk is such that paracetamol should usually be withheld in this setting", "liver", "hepat")
     ],
     pregnancy: "Safe and may be administered if indicated.",
     doses: [
@@ -1245,7 +1247,7 @@ const EMT_DRUGS = [
       it("Minor allergy associated with rash", "minor", "rash", "allerg")
     ],
     contra: [ALLERGY],
-    cautions: [it("Age less than five years with asthma. Steroids do not usually alter the course of asthma at this age, but are indicated if the child has a clear history of asthma and has previously received oral steroids", "under 5", "<\\s*5", "5 ?y", "five", "child")],
+    cautions: [it("Age less than five years with asthma. Steroids do not usually have a role in children aged less than five years because they do not generally alter the course of their asthma exacerbation. However, a steroid is indicated if the child has a clear history of asthma and has previously received oral steroids", "under 5", "<\\s*5", "5 ?y", "five", "child")],
     pregnancy: "Safety not demonstrated, but steroids appear to be safe. Give for bronchospasm; withhold for minor problems such as rash or itch. " + BREASTFEED,
     doses: [
       { label: "Dose", text: "40 mg for an adult. See the paediatric drug dose tables for a child.", q: "What is the adult dose of prednisone?", ans: [[40, "mg"]] },
@@ -1323,10 +1325,10 @@ const EMT_DRUGS = [
     indications: [it("Moderate to severe pain, particularly if an opiate and/or ketamine is not going to be administered", "pain")],
     contra: [ALLERGY, it("Aged less than 12 years", "12")],
     cautions: [
-      it("Tramadol taken within the last four hours. More may be given only if the total within four hours does not exceed the CPG dose. Withhold if in doubt", "4 ?h", "four", "recent", "already"),
-      it("Abdominal pain, particularly if the patient is very unwell or vomiting", "abdom"),
-      it("Aged ≥ 75 years, particularly with a history of dementia or confusion", "75", "elderly", "dementia"),
-      it("Confusion (anticholinergic activity may worsen it)", "confus"),
+      it("Tramadol has been taken within the last four hours. Additional tramadol may be administered provided it is clear that the total dose taken within a four hour period does not exceed the dose described within the CPGs. Withhold tramadol if there is any doubt", "4 ?h", "four", "recent", "already"),
+      it("Abdominal pain, particularly if the patient is very unwell or vomiting. Clinical judgement is required, but if the patient is very unwell or vomiting, the possibility of significant intra-abdominal pathology exists and oral medicines should usually be withheld", "abdom"),
+      it("Aged greater than or equal to 75 years, particularly if there is a previous history of dementia or confusion. Tramadol has anticholinergic activity and this may cause confusion, particularly in the elderly", "75", "elderly", "dementia"),
+      it("Confusion. Tramadol has anticholinergic activity and this may worsen confusion", "confus"),
       it("Pregnancy", "pregnan")
     ],
     pregnancy: "Safety has not been demonstrated and tramadol should usually be withheld. " + BREASTFEED,
@@ -1869,9 +1871,7 @@ const PARA_DRUGS = [
     src: "current",
     routes: [it("IV (cardiac arrest only)", "\\biv\\b", "intraven")],
     moa: [
-      "Amiodarone is an antidysrhythmic with a broad spectrum of activity, predominantly class III.",
-      "It prolongs the action potential duration, reduces automaticity and prolongs the refractory period of atrial, nodal and ventricular tissues.",
-      "This reduces abnormal electrical activity (for example ectopy) and electrical conduction, reduces heart rate and stabilises the SA and AV nodes."
+      "Amiodarone is an antidysrhythmic with a broad spectrum of activity. Amiodarone has predominantly class III activity. It prolongs the action potential duration, reduces automaticity and prolongs the refractory period of atrial, nodal and ventricular tissues. The electrophysiological effects result in a reduction in abnormal electrical activity (for example ectopy), a reduction in electrical conduction, a reduction in heart rate and a stabilisation of the SA and AV nodes. Amiodarone also causes a small increase in coronary blood flow (although this is not usually clinically significant) and a reduction in myocardial oxygen consumption by reducing inotropy (the force of cardiac contraction)."
     ],
     moaKeys: ["class (iii|3)|antidysrhythm|antiarrhythm|refractory|action potential"],
     indications: [it("Cardiac arrest with VF or VT after three shocks", "\\bvf\\b|\\bvt\\b|ventric", "three|3")],
@@ -1879,11 +1879,11 @@ const PARA_DRUGS = [
     contra: [
       ALLERGY,
       it("Known severe allergy to iodine", "iodine"),
-      it("VT secondary to cyclic antidepressant poisoning (can severely worsen shock without resolving the rhythm)", "tricyclic|cyclic|tca|antidepress"),
-      it("Torsades de pointes is present or has occurred", "torsade")
+      it("VT secondary to cyclic antidepressant poisoning. In this setting amiodarone administration can be associated with severe worsening of shock, without resolution of the rhythm", "tricyclic|cyclic|tca|antidepress"),
+      it("If torsades de pointes is present or has occurred", "torsade")
     ],
     cautions: [
-      it("None if the patient is in cardiac arrest (except tricyclic poisoning or torsades de pointes, see contraindications)", "none|nil|arrest"),
+      it("None if the patient is in cardiac arrest (with the exception of arrests involving tricyclic antidepressant poisoning or Torsades de Pointes, see contraindications)", "none|nil|arrest"),
     ],
     pregnancy: "May cause harm during pregnancy. Do not administer amiodarone unless there is a strong clinical indication. " + BREASTFEED,
     doses: [
@@ -1913,15 +1913,17 @@ const PARA_DRUGS = [
     ref: "EAS 14.49",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven")],
-    moa: ["Cefazolin is a first-generation cephalosporin antibiotic with activity against gram-negative and gram-positive bacteria. It inhibits production of the bacterial cell wall, causing bacteria to die."],
+    moa: [
+      "Cefazolin is a first-generation cephalosporin antibiotic with activity against gram-negative and gram-positive bacteria. It inhibits production of the bacterial cell wall, causing bacteria to die."
+    ],
     moaKeys: ["cell wall|cephalosporin"],
     indications: [
-      it("Sepsis where the source appears to be soft tissue or a joint, aged ≥ 12 years, one or more clinical features indicating antibiotics, and time to hospital > 30 minutes", "sepsis|septic"),
+      it("Sepsis, where the source of infection appears to be the soft tissues or joint, and: The patient is aged greater than or equal to 12 years, and Has one or more clinical features indicating antibiotics, and Time to hospital is greater than 30 minutes", "sepsis|septic"),
       it("Compound fracture", "compound|open fracture"),
       it("Large contaminated wound", "wound|contaminat"),
       it("Following chest decompression", "decompress|chest"),
       it("Following amputation", "amputat"),
-      it("Cellulitis (a single dose if not being referred or transported)", "cellulitis")
+      it("Cellulitis. In this setting a single dose may be administered if the patient is not being directly referred (or transported) to a medical facility", "cellulitis")
     ],
     indNeed: 4,
     contra: [it("Known severe allergy to cephalosporins", "allerg|anaphyla|hypersens")],
@@ -1956,7 +1958,7 @@ const PARA_DRUGS = [
     moaKeys: ["cell wall|cephalosporin"],
     indications: [
       it("Suspected meningococcal septicaemia", "mening"),
-      it("Sepsis where cefazolin is not indicated, aged ≥ 12 years, one or more clinical features indicating antibiotics, and time to hospital > 30 minutes", "sepsis|septic")
+      it("Sepsis, where cefazolin is not indicated, and: The patient is aged greater than or equal to 12 years, and One or more clinical features indicating antibiotics are present, and Time to hospital is greater than 30 minutes", "sepsis|septic")
     ],
     indNeed: 2,
     contra: [it("Anaphylaxis to cephalosporins", "allerg|anaphyla|hypersens")],
@@ -1990,16 +1992,15 @@ const PARA_DRUGS = [
     src: "current",
     routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
     moa: [
-      "Clopidogrel has antiplatelet activity.",
-      "It blocks the binding of adenosine diphosphate (ADP) to platelets and impairs platelet function. It provides significantly more antiplatelet activity than aspirin."
+      "Clopidogrel has antiplatelet activity. Clopidogrel antagonises (blocks) the binding of adenosine diphosphate (ADP) to platelets and impairs platelet function. Clopidogrel provides significantly more antiplatelet activity than aspirin."
     ],
     moaKeys: ["platelet|adp"],
     indications: [it("STEMI in conjunction with fibrinolytic therapy", "stemi|fibrinoly|thrombolys|tenecteplase")],
     indNeed: 1,
     contra: [ALLERGY],
     cautions: [
-      it("Clinically significant bleeding (clopidogrel will increase bleeding)", "bleed"),
-      it("At risk of bleeding: if any cautions are present in the fibrinolytic therapy checklist, seek clinical advice", "risk|checklist|advice"),
+      it("Clinically significant bleeding. Clopidogrel will increase bleeding", "bleed"),
+      it("At risk of bleeding. If there are any cautions present within the fibrinolytic therapy checklist, personnel must seek clinical advice", "risk|checklist|advice"),
       it("Pregnancy", "pregnan")
     ],
     pregnancy: "Safety has not been demonstrated during pregnancy. The likelihood of STEMI in a pregnant woman is so low that personnel must seek clinical advice. " + BREASTFEED,
@@ -2027,13 +2028,15 @@ const PARA_DRUGS = [
     ref: "EAS 14.11",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc"), it("SC (care during the last days of life)", "\\bsc\\b", "subcut")],
-    moa: ["Droperidol blocks dopamine and alpha receptors centrally, causing sedation, reduced agitation, a state of mental detachment, and an antiemetic action."],
+    moa: [
+      "Droperidol blocks dopamine and alpha receptors centrally, resulting in sedation, reduced agitation and a state of mental detachment, and antiemetic action."
+    ],
     moaKeys: ["dopamine"],
     indications: [
-      it("Aged ≥ 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when olanzapine has not been given or is ineffective", "behav|agitat|abd\\b"),
-      it("Severe pain, usually with an opiate, with chronic opiate use, severe psychological distress, or nausea and/or vomiting", "pain|analges"),
-      it("Nausea and agitation, or pain not responding to an opiate, during the last days of life", "last days|palliat|end of life|dying"),
-      it("Nausea and/or vomiting that persists despite ondansetron, involves motion sickness, or is from cannabinoid hyperemesis syndrome", "nausea|vomit|motion|cannabi"),
+      it("Patients aged greater than or equal to 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when olanzapine has not been administered or is ineffective", "behav|agitat|abd\\b"),
+      it("Severe pain, usually in conjunction with an opiate, associated with one of the following: Chronic use of opiates. Severe psychological distress. Nausea and/or vomiting", "pain|analges"),
+      it("Management of nausea and agitation or pain that does not respond to an opiate during the last days of life", "last days|palliat|end of life|dying"),
+      it("Nausea and/or vomiting: That persists despite ondansetron, or Where motion sickness is a component of the patient's nausea and/or vomiting, or The patient has cannabinoid hyperemesis syndrome", "nausea|vomit|motion|cannabi"),
       it("Vertigo", "vertigo"),
       it("Primary headache that is severe", "headache|migraine")
     ],
@@ -2044,11 +2047,11 @@ const PARA_DRUGS = [
       it("Pregnancy (unless indicated for acute behavioural disturbance)", "pregnan")
     ],
     cautions: [
-      it("Altered level of consciousness (effects increased and prolonged)", "conscious|loc\\b|gcs|drows"),
-      it("Parkinson's disease (risk of worsening the movement disorder)", "parkinson"),
-      it("Concurrent ketamine or midazolam (effects increased and prolonged)", "ketamine|midazolam"),
-      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
-      it("Signs of shock (may make shock worse)", "shock|hypotens")
+      it("Altered level of consciousness. This will increase and prolong the effects", "conscious|loc\\b|gcs|drows"),
+      it("Parkinson's disease. There is a risk of worsening the movement disorder associated with Parkinson's disease", "parkinson"),
+      it("Concurrent administration of ketamine or midazolam. This will increase and prolong the effects", "ketamine|midazolam"),
+      it("Aged greater than or equal to 75 years, particularly if frail. The effects of droperidol will be increased and prolonged in this cohort", "75|elderly|frail"),
+      it("Signs of shock. Droperidol may make shock worse", "shock|hypotens")
     ],
     pregnancy: "Should be administered if indicated for acute behavioural disturbance. For all other indications it is contraindicated in pregnancy or when breastfeeding.",
     doses: [
@@ -2085,14 +2088,16 @@ const PARA_DRUGS = [
     ref: "EAS 14.12",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("SC", "\\bsc\\b", "subcut")],
-    moa: ["Enoxaparin is a low molecular weight heparin (LMWH) anticoagulant. It potentiates antithrombin III, inhibiting multiple coagulation factors, particularly factor Xa."],
+    moa: [
+      "Enoxaparin is a low molecular weight heparin (LMWH) anticoagulant. Enoxaparin potentiates the activity of antithrombin III (a naturally occurring anticoagulant) causing inhibition of multiple coagulation factors, particularly factor Xa."
+    ],
     moaKeys: ["antithrombin|xa\\b|factor|anticoag|heparin"],
     indications: [it("STEMI in conjunction with fibrinolytic therapy", "stemi|fibrinoly|thrombolys|tenecteplase")],
     indNeed: 1,
     contra: [ALLERGY],
     cautions: [
-      it("Clinically significant bleeding (enoxaparin will increase bleeding)", "bleed"),
-      it("At risk of bleeding: if any cautions are present in the fibrinolytic therapy checklist, seek clinical advice or discuss with the STEMI coordinator", "risk|checklist|advice|coordinator"),
+      it("Clinically significant bleeding. Enoxaparin will increase bleeding", "bleed"),
+      it("At risk of bleeding. If there are any cautions present within the fibrinolytic therapy checklist, personnel must seek clinical advice or discuss with the STEMI coordinator prior to administration", "risk|checklist|advice|coordinator"),
       it("Pregnancy", "pregnan")
     ],
     pregnancy: "Safety has not been demonstrated. Seek clinical advice before administration. " + BREASTFEED,
@@ -2124,24 +2129,26 @@ const PARA_DRUGS = [
     ref: "EAS 14.13",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IN", "\\bin\\b", "intranas", "nasal"), it("IM", "\\bim\\b", "intramusc"), it("SC", "\\bsc\\b", "subcut")],
-    moa: ["Fentanyl is an opiate analgesic. It is an opiate agonist that binds to opiate receptors in the brain and spinal cord, causing analgesia."],
+    moa: [
+      "Fentanyl is an opiate analgesic. It is an opiate agonist (or stimulator) that binds to opiate receptors in the brain and spinal cord causing analgesia."
+    ],
     moaKeys: ["opi(ate|oid)"],
     indications: [
       it("Moderate to severe pain", "pain|analges"),
       it("Cardiogenic pulmonary oedema with severe anxiety", "pulmonary|oedema|edema|anxi"),
-      it("Control of pain, agitation or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
+      it("Control of pain, agitation, or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
       it("Autonomic dysreflexia, even if the patient cannot feel pain", "dysreflex")
     ],
     indNeed: 3,
     contra: [ALLERGY],
     cautions: [
-      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
-      it("Aged less than one year (increased risk of respiratory depression)", "one year|1 year|infant|under 1"),
-      it("Respiratory depression or at high risk of it, for example severe COPD, morbid obesity or home BiPAP", "respirat|copd|obes|bipap"),
-      it("Labour (opiates cross the placenta and may depress the baby's breathing)", "labour|labor|birth"),
-      it("Concurrent other opiates, ketamine or midazolam", "opi(ate|oid)|ketamine|midazolam"),
-      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
-      it("Signs of shock", "shock|hypotens")
+      it("Altered level of consciousness. Fentanyl may further reduce the level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Aged less than one year. Children under the age of one year are at increased risk of respiratory depression following opiate administration", "one year|1 year|infant|under 1"),
+      it("Respiratory depression or at high risk of respiratory depression. For example, severe COPD, morbid obesity or on home BiPAP. Such patients may develop respiratory depression following opiate administration", "respirat|copd|obes|bipap"),
+      it("Labour. Opiates cross the placenta and may cause drowsiness and/or respiratory depression in the baby, particularly when administered within an hour or two of birth. Discuss administration with the lead maternity carer if possible. Following birth, close observation of the baby is required and personnel must be prepared to treat respiratory depression", "labour|labor|birth"),
+      it("Concurrent administration of other opiates, ketamine or midazolam. This will increase and prolong the effects", "opi(ate|oid)|ketamine|midazolam"),
+      it("Aged greater than or equal to 75 years, particularly if frail. The effects of fentanyl will be increased and prolonged in this cohort", "75|elderly|frail"),
+      it("Signs of shock. Fentanyl may make shock worse", "shock|hypotens")
     ],
     pregnancy: "Safety has not been demonstrated in pregnancy, but fentanyl should be administered if indicated. " + BREASTFEED,
     doses: [
@@ -2181,7 +2188,9 @@ const PARA_DRUGS = [
     ref: "EAS 14.20",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc")],
-    moa: ["Hydrocortisone is a corticosteroid with anti-inflammatory and immunosuppressant actions. It inhibits the production of inflammatory mediators, including prostaglandins and leukotrienes, reducing the inflammatory and immune response."],
+    moa: [
+      "Hydrocortisone is a corticosteroid with anti-inflammatory and immunosuppressant actions. It inhibits the production of inflammatory mediators, including prostaglandins and leukotrienes, resulting in a reduction in the inflammatory and immune response."
+    ],
     moaKeys: ["inflam|steroid|immun"],
     indications: [
       it("At risk of adrenal crisis or suspected to have adrenal crisis", "adrenal|addison"),
@@ -2217,18 +2226,17 @@ const PARA_DRUGS = [
     src: "current",
     routes: [it("IV (analgesia only)", "\\biv\\b", "intraven"), it("IM (analgesia, if IV access cannot be obtained)", "\\bim\\b", "intramusc"), it("PO (analgesia, if IM is not feasible)", "\\bpo\\b", "oral")],
     moa: [
-      "Ketamine is predominantly an N-methyl-d-aspartate (NMDA) receptor antagonist, inhibiting excitatory neurotransmitters in the brain.",
-      "Low doses cause analgesia, larger doses cause amnesia and dissociation, and high doses cause anaesthesia."
+      "Ketamine has complex actions but is predominantly an N-methyl-d-aspartate (NMDA) receptor antagonist (blocker), resulting in inhibition of excitatory neurotransmitters in the brain. Low doses cause analgesia, larger doses cause amnesia and dissociation, and high doses cause anaesthesia."
     ],
     moaKeys: ["nmda"],
     indications: [it("Severe pain that has not been adequately controlled with an opiate", "pain|analges", "opi(ate|oid)|not controlled|inadequate|despite")],
     indNeed: 1,
     contra: [ALLERGY],
     cautions: [
-      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
-      it("Signs of shock", "shock|hypotens"),
-      it("Concurrent opiates or midazolam", "opi(ate|oid)|midazolam|fentanyl|morphine"),
-      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail"),
+      it("Altered level of consciousness. Ketamine may reduce the level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Signs of shock. Ketamine may make shock worse", "shock|hypotens"),
+      it("Concurrent administration of opiates or midazolam. This will increase and prolong the effects", "opi(ate|oid)|midazolam|fentanyl|morphine"),
+      it("Aged greater than or equal to 75 years, particularly if frail. The effects of ketamine will be increased and prolonged in this cohort", "75|elderly|frail"),
       it("Aged less than five years", "five|5 ?y|under 5")
     ],
     pregnancy: "Safety has not been demonstrated during pregnancy, but ketamine should be administered if indicated. " + BREASTFEED,
@@ -2266,11 +2274,13 @@ const PARA_DRUGS = [
     ref: "EAS 14.51",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven")],
-    moa: ["Levetiracetam is an anticonvulsant. It is thought to inhibit seizure activity by blocking some calcium channels and binding synaptic proteins to modulate neurotransmitter release."],
+    moa: [
+      "Levetiracetam is an anticonvulsant. It is thought to inhibit seizure activity by blocking some calcium channels and also binding synaptic proteins to modulate neurotransmitter release."
+    ],
     moaKeys: ["anticonvuls|calcium|synap|seizure"],
     indications: [
       it("Seizure that continues or recurs after two doses of parenteral midazolam", "midazolam|two doses|2 doses|continu|recur"),
-      it("Seizure activity associated with severe TBI, even if it has stopped after midazolam", "tbi|head injur|brain injur")
+      it("Seizure activity associated with severe TBI, even if seizure activity has ceased following midazolam", "tbi|head injur|brain injur")
     ],
     indNeed: 2,
     contra: [ALLERGY],
@@ -2298,12 +2308,14 @@ const PARA_DRUGS = [
     ref: "EAS 14.25",
     src: "current",
     routes: [it("SC", "\\bsc\\b", "subcut"), it("IO", "\\bio\\b", "intraoss")],
-    moa: ["Lignocaine is a local anaesthetic. It blocks the initiation and transmission of nerve impulses by blocking the movement of sodium ions across the nerve cell membrane."],
+    moa: [
+      "Lignocaine is a local anaesthetic. Lignocaine blocks the initiation and transmission of nerve impulses by blocking the movement of sodium ions across the nerve cell membrane."
+    ],
     moaKeys: ["sodium|local anaes"],
     indications: [
-      it("SC for prophylaxis of pain from IV cannulation", "cannula|\\biv\\b"),
-      it("SC for digital ring blocks for analgesia", "ring block|digit|finger"),
-      it("IO for significant bone pain from intraosseous administration", "\\bio\\b|intraoss|bone")
+      it("Subcutaneous injection for prophylaxis of pain associated with IV cannulation", "cannula|\\biv\\b"),
+      it("Subcutaneous injection for digital ring blocks for analgesia", "ring block|digit|finger"),
+      it("Intraosseous injection for significant bone pain associated with intraosseous administration", "\\bio\\b|intraoss|bone")
     ],
     indNeed: 3,
     contra: [ALLERGY, it("Local infection in the area of injection", "infect")],
@@ -2339,17 +2351,19 @@ const PARA_DRUGS = [
     ref: "EAS 14.52",
     src: "current",
     routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
-    moa: ["Metoprolol is an immediate release beta blocker. It blocks beta-1 receptors in the heart, decreasing heart rate, cardiac output and blood pressure."],
+    moa: [
+      "Metoprolol is an immediate release beta blocker. It antagonises (blocks) beta-1 receptors in the heart, causing a decrease in heart rate, cardiac output and blood pressure."
+    ],
     moaKeys: ["beta"],
-    indications: [it("Adults with moderate cardiovascular compromise from atrial fibrillation, with a ventricular rate predominantly > 130/minute", "\\baf\\b|atrial fib", "130|rapid|fast")],
+    indications: [it("Adults with moderate cardiovascular compromise as a result of atrial fibrillation, where the ventricular rate is predominantly greater than 130/minute", "\\baf\\b|atrial fib", "130|rapid|fast")],
     indNeed: 1,
-    contra: [ALLERGY, it("Hypotension (metoprolol will further reduce the blood pressure)", "hypotens|low bp|low blood")],
+    contra: [ALLERGY, it("Hypotension. Metoprolol will further reduce the blood pressure", "hypotens|low bp|low blood")],
     cautions: [
-      it("First degree heart block", "first degree|1st degree"),
-      it("Known sick sinus syndrome without an internal pacemaker", "sick sinus"),
-      it("Previous second or third degree heart block without an internal pacemaker", "second|third|2nd|3rd|heart block"),
-      it("Asthma or COPD (may cause bronchospasm; usually withhold if they regularly take bronchodilators)", "asthma|copd|bronch"),
-      it("Heart failure", "heart failure|chf|ccf"),
+      it("First degree heart block. Metoprolol may cause bradycardia", "first degree|1st degree"),
+      it("Known sick sinus syndrome without an internal pacemaker in place. Metoprolol may cause bradycardia", "sick sinus"),
+      it("Previous second or third degree heart block without an internal pacemaker in place. Metoprolol may cause worsening of heart block and bradycardia", "second|third|2nd|3rd|heart block"),
+      it("Asthma or COPD. Metoprolol may cause bronchospasm and should usually be withheld if the patient regularly takes bronchodilators", "asthma|copd|bronch"),
+      it("Heart failure. Metoprolol will reduce cardiac output and may make heart failure worse", "heart failure|chf|ccf"),
       it("Pregnancy", "pregnan")
     ],
     pregnancy: "Safety has not been demonstrated. Seek clinical advice before administration. " + BREASTFEED,
@@ -2374,21 +2388,23 @@ const PARA_DRUGS = [
     ref: "EAS 14.31",
     src: "current",
     routes: [it("IM (acute behavioural disturbance, seizures, last days of life)", "\\bim\\b", "intramusc"), it("IV (seizures, last days of life)", "\\biv\\b", "intraven"), it("SC (last days of life)", "\\bsc\\b", "subcut")],
-    moa: ["Midazolam is a benzodiazepine. It enhances the activity of GABA at GABA receptors in the central nervous system, causing anticonvulsant activity, sedation, amnesia, anxiolysis and muscle relaxation."],
+    moa: [
+      "Midazolam is a benzodiazepine. Midazolam enhances the activity of gamma-aminobutyric acid (GABA) at GABA receptors within the central nervous system, resulting in anticonvulsant activity, sedation, amnesia, anxiolysis and muscle relaxation."
+    ],
     moaKeys: ["gaba"],
     indications: [
-      it("Generalised seizures that continue for more than five minutes, or recurrent seizures", "seizure|fit|convuls"),
-      it("Acute behavioural disturbance causing a mild to moderate risk to safety, when droperidol is unavailable or ineffective (IM)", "behav|agitat|abd\\b"),
-      it("Anxiety or shortness of breath not responding to an opiate during the last days of life", "last days|palliat|end of life|dying")
+      it("Generalised seizures that continue for more than five minutes, or seizures are recurrent", "seizure|fit|convuls"),
+      it("Acute behavioural disturbance causing a mild to moderate risk to safety and droperidol is unavailable or ineffective", "behav|agitat|abd\\b"),
+      it("Control of anxiety or shortness of breath that does not respond to an opiate during the last days of life", "last days|palliat|end of life|dying")
     ],
     indNeed: 3,
     contra: [ALLERGY],
     cautions: [
-      it("Altered level of consciousness", "conscious|loc\\b|gcs|drows"),
-      it("Respiratory depression or at high risk of it, for example severe COPD, morbid obesity or home BiPAP", "respirat|copd|obes|bipap"),
-      it("Signs of shock", "shock|hypotens"),
-      it("Concurrent opiates or ketamine", "opi(ate|oid)|ketamine|fentanyl|morphine"),
-      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail")
+      it("Altered level of consciousness. Midazolam will further reduce the level of consciousness", "conscious|loc\\b|gcs|drows"),
+      it("Respiratory depression or at high risk of respiratory depression. For example, severe COPD, morbid obesity or on home BiPAP. Such patients may develop respiratory depression following midazolam administration", "respirat|copd|obes|bipap"),
+      it("Signs of shock. Midazolam may worsen shock", "shock|hypotens"),
+      it("Concurrent administration of opiates or ketamine. This will increase and prolong the effects", "opi(ate|oid)|ketamine|fentanyl|morphine"),
+      it("Aged greater than or equal to 75 years, particularly if frail. The effects of midazolam will be increased and prolonged in this cohort", "75|elderly|frail")
     ],
     pregnancy: "Safety has not been demonstrated during pregnancy, but midazolam should be administered if indicated. " + BREASTFEED,
     doses: [
@@ -2422,13 +2438,15 @@ const PARA_DRUGS = [
     ref: "EAS 14.32",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc"), it("SC", "\\bsc\\b", "subcut")],
-    moa: ["Morphine is an opiate analgesic. It is an opiate agonist that binds to opiate receptors in the brain and spinal cord, causing analgesia."],
+    moa: [
+      "Morphine is an opiate analgesic. It is an opiate agonist that binds to opiate receptors in the brain and spinal cord causing analgesia."
+    ],
     moaKeys: ["opi(ate|oid)"],
     indications: [
       it("Moderate to severe pain", "pain|analges"),
       it("Cardiogenic pulmonary oedema with severe anxiety", "pulmonary|oedema|edema|anxi"),
-      it("Control of pain, agitation or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
-      it("Autonomic dysreflexia, even if the patient cannot feel pain", "dysreflex")
+      it("Control of pain, agitation, or shortness of breath during the last days of life", "last days|palliat|end of life|dying"),
+      it("Autonomic dysreflexia, even if patient cannot feel pain", "dysreflex")
     ],
     indNeed: 3,
     contra: [ALLERGY, it("Renal failure", "renal|kidney")],
@@ -2460,15 +2478,17 @@ const PARA_DRUGS = [
     ref: "EAS 14.33",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IM", "\\bim\\b", "intramusc")],
-    moa: ["Naloxone is an opiate receptor antagonist. By blocking opiate receptors it reverses the effects of opiates, particularly respiratory depression and sedation."],
+    moa: [
+      "Naloxone is an opiate receptor antagonist (blocker). By blocking opiate receptors, naloxone reverses the effects of opiates, particularly respiratory depression and sedation."
+    ],
     moaKeys: ["antagon|block|revers"],
     indications: [
-      it("Suspected opiate poisoning with a significantly impaired level of consciousness or significantly impaired breathing", "poison|overdose|\\bod\\b"),
+      it("Opiate poisoning is suspected and the patient has a significantly impaired level of consciousness or significantly impaired breathing", "poison|overdose|\\bod\\b"),
       it("Excess adverse effects from administration of opiates", "adverse|excess|side effect|iatrogen")
     ],
     indNeed: 2,
     contra: [ALLERGY],
-    cautions: [it("Chronic opiate use (risk from rapid opiate withdrawal)", "chronic|regular|withdraw|dependen")],
+    cautions: [it("Chronic opiate use. If the patient is taking an opiate chronically, there is a risk of adverse physiological effects associated with rapid opiate withdrawal", "chronic|regular|withdraw|dependen")],
     pregnancy: "Safety has not been demonstrated in pregnancy, but naloxone should be administered if indicated. " + BREASTFEED,
     doses: [
       { label: "IV", text: "0.1–0.4 mg IV every five minutes as required for an adult.", q: "What is the adult IV dose range of naloxone?", keys: ["0\\.1", "0\\.4"], kind: "Dose" },
@@ -2498,15 +2518,17 @@ const PARA_DRUGS = [
     ref: "EAS 14.34",
     src: "current",
     routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
-    moa: ["Olanzapine is an atypical antipsychotic. It acts at multiple receptors in the brain, reducing agitation and causing sedation, anxiolysis and stabilisation of mood."],
+    moa: [
+      "Olanzapine is an atypical antipsychotic. Olanzapine has actions at multiple receptors within the brain causing a reduction in agitation, sedation, anxiolysis and stabilisation of mood."
+    ],
     moaKeys: ["antipsychot|receptor|agitat|sedat"],
-    indications: [it("Aged ≥ 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when the patient will take an oral medicine", "behav|agitat|abd\\b")],
+    indications: [it("Patients aged greater than or equal to 12 years with acute behavioural disturbance causing a mild to moderate risk to safety, when the patient will take an oral medicine", "behav|agitat|abd\\b")],
     indNeed: 1,
     contra: [ALLERGY, it("Poisoning with an antipsychotic, for example quetiapine, risperidone or olanzapine", "antipsychot|quetiapine|risperidone|olanzapine|poison")],
     cautions: [
       it("Pregnancy", "pregnan"),
-      it("Intoxication (effects increased and prolonged)", "intox|alcohol|drunk|drug"),
-      it("Aged ≥ 75 years, particularly if frail", "75|elderly|frail")
+      it("Intoxication. This will increase and prolong the effects", "intox|alcohol|drunk|drug"),
+      it("Aged greater than or equal to 75 years, particularly if frail. The effects of olanzapine will be increased and prolonged in this cohort", "75|elderly|frail")
     ],
     pregnancy: "Safety has not been demonstrated during pregnancy and olanzapine should usually be withheld. " + BREASTFEED,
     doses: [{ label: "Dose", text: "10 mg PO. Consider reducing the dose to 5 mg PO if a caution is present. The dose may be repeated once after 20 minutes.", q: "What is the dose of olanzapine?", ans: [[10, "mg"]] }],
@@ -2530,7 +2552,9 @@ const PARA_DRUGS = [
     ref: "EAS 14.36",
     src: "current",
     routes: [it("IM", "\\bim\\b", "intramusc"), it("IV (postpartum haemorrhage, preferred)", "\\biv\\b", "intraven")],
-    moa: ["Oxytocin is a synthetic version of the hormone normally released from the pituitary gland. It stimulates oxytocin receptors on the uterus, increasing uterine contraction and reducing blood loss from the uterus."],
+    moa: [
+      "Oxytocin is a synthetic version of the naturally occurring hormone oxytocin which is normally released from the pituitary gland. Oxytocin stimulates oxytocin receptors on the uterus, causing increased uterine contraction and reducing blood loss from the uterus."
+    ],
     moaKeys: ["uter|contract"],
     indications: [it("Following normal birth", "birth|deliver"), it("Postpartum haemorrhage", "pph|postpartum|post-partum|haemorrh|hemorrh|bleed")],
     indNeed: 2,
@@ -2566,7 +2590,9 @@ const PARA_DRUGS = [
     ref: "EAS 14.45",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven")],
-    moa: ["Tenecteplase is a fibrinolytic. It converts plasminogen into the active enzyme plasmin, which breaks down fibrin within blood clots."],
+    moa: [
+      "Tenecteplase is a fibrinolytic that accelerates the breakdown of blood clots. It converts the plasma protein plasminogen into the active enzyme plasmin, which breaks down fibrin within blood clots."
+    ],
     moaKeys: ["plasmin|fibrin"],
     indications: [it("STEMI when following the fibrinolytic pathway", "stemi|fibrinoly|thrombolys")],
     indNeed: 1,
@@ -2575,15 +2601,15 @@ const PARA_DRUGS = [
       it("More than ten minutes of CPR", "cpr"),
       it("Non-compressible vascular puncture within the last 24 hours", "puncture"),
       it("Internal bleeding within the last six weeks", "internal bleed|gi bleed"),
-      it("Lumbar puncture or epidural within the last six weeks", "lumbar|epidural"),
+      it("Lumbar puncture or epidural insertion within the last six weeks", "lumbar|epidural"),
       it("TIA within the last three months", "\\btia\\b|transient"),
       it("Known bleeding disorder", "bleeding disorder|haemophil|coagul"),
       it("Taking an anticoagulant", "anticoag|warfarin|thinner"),
-      it("Systolic BP > 180 mmHg or diastolic BP > 110 mmHg", "180|110|hypertens|\\bbp\\b"),
+      it("Systolic BP greater than 180 mmHg or diastolic BP greater than 110 mmHg", "180|110|hypertens|\\bbp\\b"),
       it("Known to be pregnant or less than two weeks postpartum", "pregnan|postpartum"),
-      it("Symptom onset more than 12 hours ago", "12 ?h|twelve"),
-      it("Needs assistance with activities of daily living", "adl|daily living|assistance"),
-      it("Severe comorbidities that significantly limit life expectancy", "comorbid|life expect"),
+      it("Time of onset of symptoms was greater than 12 hours ago", "12 ?h|twelve"),
+      it("Requires assistance with their activities of daily living", "adl|daily living|assistance"),
+      it("Severe comorbidities that significantly limit their life expectancy", "comorbid|life expect"),
       it("Suspected aortic dissection", "dissect"),
       it("Major surgery, major trauma or severe brain injury within the last six weeks", "surgery|trauma"),
       it("Intracranial surgery within the last six months", "intracranial|neurosurg"),
@@ -2620,13 +2646,15 @@ const PARA_DRUGS = [
     ref: "EAS 14.53",
     src: "current",
     routes: [it("PO", "\\bpo\\b", "oral", "mouth")],
-    moa: ["Ticagrelor has antiplatelet activity. It reversibly inhibits the ADP receptor on platelets, decreasing platelet aggregation."],
+    moa: [
+      "Ticagrelor has antiplatelet activity. It produces reversible inhibition of the ADP receptor on platelets, decreasing platelet aggregation."
+    ],
     moaKeys: ["platelet|adp"],
-    indications: [it("STEMI on the primary PCI pathway, when requested by the accepting clinician", "stemi|pci", "request|accepting|clinician|cardiolog")],
+    indications: [it("STEMI, in conjunction with the primary PCI pathway, when requested by the accepting clinician", "stemi|pci", "request|accepting|clinician|cardiolog")],
     indNeed: 1,
     contra: [ALLERGY],
     cautions: [
-      it("Clinically significant bleeding (ticagrelor will increase bleeding)", "bleed"),
+      it("Clinically significant bleeding. Ticagrelor will increase bleeding", "bleed"),
       it("At risk of bleeding", "risk"),
       it("Pregnancy", "pregnan")
     ],
@@ -2652,20 +2680,22 @@ const PARA_DRUGS = [
     ref: "EAS 14.47",
     src: "current",
     routes: [it("IV", "\\biv\\b", "intraven"), it("IN (epistaxis)", "\\bin\\b", "intranas", "nasal"), it("Nebulised (bleeding after tonsillectomy)", "nebul")],
-    moa: ["Tranexamic acid is an antifibrinolytic. It blocks the conversion of plasminogen to plasmin, reducing fibrinolysis (breakdown of blood clots) and bleeding."],
+    moa: [
+      "Tranexamic acid is an antifibrinolytic medicine. It blocks the conversion of plasminogen to plasmin, reducing fibrinolysis (breakdown of blood clots) and bleeding."
+    ],
     moaKeys: ["plasmin|fibrinoly"],
     indications: [
       it("Postpartum haemorrhage", "pph|postpartum|post-partum"),
       it("Clinically significant bleeding or signs of hypovolaemia following trauma", "trauma"),
-      it("Non-traumatic bleeding with severe shock", "non-?trauma|shock"),
+      it("Non-traumatic bleeding and shock is severe", "non-?trauma|shock"),
       it("Cardiac arrest secondary to trauma", "arrest"),
       it("Bleeding following tonsillectomy", "tonsil"),
       it("Crush injury", "crush"),
-      it("Moderate to severe epistaxis not controlled after one dose of adrenaline IN", "epistaxis|nose ?bleed"),
-      it("Antepartum haemorrhage with shock and/or severe bleeding", "antepartum|aph\\b")
+      it("Moderate to severe epistaxis, not controlled following one dose of adrenaline IN", "epistaxis|nose ?bleed"),
+      it("Antepartum haemorrhage if shock and/or bleeding is severe", "antepartum|aph\\b")
     ],
     indNeed: 5,
-    contra: [ALLERGY, it("Trauma when it would be given more than three hours after the injury (appears to increase mortality)", "3 ?h|three hours|3 hours")],
+    contra: [ALLERGY, it("Trauma when tranexamic acid will be administered more than three hours after the time of injury. This appears to increase mortality rates, the cause of which is not clear", "3 ?h|three hours|3 hours")],
     cautions: NONE,
     pregnancy: "Safety has not been demonstrated, but the balance of risk is such that it should be administered if indicated.",
     doses: [
