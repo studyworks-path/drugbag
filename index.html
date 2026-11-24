@@ -637,6 +637,11 @@ body.dys .ref summary .routes{order:3}
 .kapai #kapaiText{white-space:normal;text-wrap:balance}
 #fc-mode-help + .picker-head{margin-top:16px}
 #fc-neworder + p.small{margin-bottom:14px}
+.dose-note{display:block;margin-top:4px;font-size:.85rem;font-weight:600;color:var(--muted)}
+/* the rainbow ambulance beside the greeting */
+.hero-top .bubble{flex:1;min-width:0}
+.hero-amb{width:118px;flex:none;border-radius:14px;box-shadow:var(--shadow);align-self:center}
+@media (max-width:520px){.hero-top{flex-wrap:wrap}.hero-amb{width:auto;height:64px;margin-left:auto}.hero-top .bubble{flex-basis:100%;order:1}.hero-top .bubble::before{left:30px;top:-8px;transform:rotate(135deg)}}
 </style>
 </head>
 <body>
@@ -2142,7 +2147,9 @@ const PARA_DRUGS = [
     doses: [
       { label: "IV bolus for analgesia", text: "10–50 mcg every five minutes for an adult, as required. Use a dose at the lower end of the range if the patient is frail or has signs of shock. See the paediatric drug dose tables for a child.",
         q: "What is the adult IV bolus dose range of fentanyl for analgesia, and how often?", keys: ["10", "50", "5 ?min|five"], kind: "Dose" },
-      { label: "IV infusion", text: "Start at 1 mcg/kg/hour, up to a maximum of 150 mcg/hour. Give additional boluses as required every five minutes and adjust the rate every 15–20 minutes." },
+      // in the CPG, but run through a syringe driver, which is CCP only on road for now: shown in Drugs, never tested
+      { label: "IV infusion", text: "Start at 1 mcg/kg/hour, up to a maximum of 150 mcg/hour. Give additional boluses as required every five minutes and adjust the rate every 15–20 minutes.",
+        noTest: true, note: "Given through a syringe driver, which is currently CCP only on road. Drug Bag doesn't test this dose." },
       { label: "IV for autonomic dysreflexia", text: "20–30 mcg increments to a total of 100 mcg.", q: "Fentanyl IV for autonomic dysreflexia: increments and total?", keys: ["20", "30", "100"], kind: "Dose" },
       { label: "IN for analgesia", text: "100 mcg for an adult. Halve the dose if frail or signs of shock. Repeat as required every 20 minutes. See the paediatric drug dose tables for a child.",
         q: "What is the adult IN dose of fentanyl for analgesia?", ans: [[100, "mcg"]] },
@@ -3568,6 +3575,52 @@ const PARA_SCENARIOS_3 = [
 ];
 if (SCOPE === "para") SCENARIOS.push(...PARA_SCENARIOS_3);
 
+/* =============== ADVERSE EFFECTS (side effects) =============== */
+// From each monograph's "Common adverse effects" section (NZ CPGs, September 2026 export).
+// A drug the CPG lists as "None." still gets a card, and the answer is "None".
+// Morphine and glucose 10% have no adverse effects section in the export, so they get no card.
+const NONE_ADV = [it("None", "\\bnone\\b", "\\bnil\\b", "\\bno (common )?(adverse|side)", "nothing")];
+const BLEED = it("Increased bleeding", "bleed", "haemorrh", "hemorrh");
+const ADVERSE = {
+  adrenaline: [it("Tachycardia", "tachycard"), it("Tachydysrhythmia", "tachydys", "tachyarr", "dysrhythm", "arrhythm"), it("Myocardial ischaemia", "isch", "angina", "chest pain"),
+    it("Ventricular ectopy", "ectop", "pvc", "vent"), it("Hypertension", "hypertens", "high (bp|blood pressure)"), it("Nausea and vomiting", "nause", "vomit"),
+    it("Tremor, anxiety and sweating", "tremor", "anxi", "sweat", "shak"), it("Hyperglycaemia", "hyperglyc", "high (bgl|blood (sugar|glucose))")],
+  aspirin: [BLEED, it("Indigestion, GI ulceration and GI bleeding are only linked to long-term use", "long", "chronic", "indigest", "ulcer")],
+  glucagon: NONE_ADV,
+  gtn: [it("Hypotension", "hypotens", "low (bp|blood pressure)"), it("Flushing", "flush"), it("Headache", "headache"), it("Tachycardia", "tachycard"), it("Feeling light-headed", "light.?head", "dizz", "faint")],
+  ibuprofen: [it("Renal impairment", "renal", "kidney"), BLEED, it("Indigestion, GI ulceration and GI bleeding are only linked to long-term use", "long", "chronic", "indigest", "ulcer")],
+  ipratropium: [it("Tachycardia", "tachycard"), it("Dry mouth", "dry mouth", "mouth"), it("Blurred vision (usually only with repeated doses)", "blur", "vision")],
+  loratadine: NONE_ADV,
+  methoxyflurane: [it("Sedation", "sedat", "drows", "sleep"), it("Feeling light-headed", "light.?head", "dizz")],
+  ondansetron: [it("Headache", "headache"), it("Flushing", "flush")],
+  paracetamol: NONE_ADV,
+  prednisone: [it("Fatigue", "fatigue", "tired"), it("Sodium and water retention (usually only significant with prolonged dosing)", "sodium", "water", "fluid", "retention"), it("Gastrointestinal reflux", "reflux", "heartburn", "gastro")],
+  salbutamol: [it("Tremor", "tremor", "shak"), it("Tachycardia", "tachycard")],
+  tramadol: [it("Nausea and/or vomiting", "nause", "vomit"), it("Feeling light-headed or unusual", "light.?head", "unusual", "dizz", "strange"), it("Sedation", "sedat", "drows"), it("Dry mouth", "dry mouth", "mouth")],
+  amiodarone: [it("Hypotension", "hypotens", "low (bp|blood pressure)"), it("Lightheadedness", "light.?head", "dizz"), it("Bradydysrhythmia", "brady")],
+  cefazolin: NONE_ADV,
+  ceftriaxone: NONE_ADV,
+  clopidogrel: [BLEED],
+  droperidol: [it("Hypotension, which may occur if a large IV dose is given rapidly", "hypotens", "low (bp|blood pressure)")],
+  enoxaparin: [BLEED],
+  fentanyl: [it("Respiratory depression", "resp", "breath", "apnoe"), it("Bradycardia", "bradycard"), it("Hypotension", "hypotens", "low (bp|blood pressure)"), it("Sedation", "sedat", "drows"),
+    it("Nausea and vomiting", "nause", "vomit"), it("Itch", "itch", "prurit"), it("Euphoria", "euphor", "high")],
+  hydrocortisone: [it("Fatigue", "fatigue", "tired"), it("Sodium and water retention (usually only significant with repeated or prolonged dosing)", "sodium", "water", "fluid", "retention")],
+  ketamine: [it("Transient hypertension", "hypertens", "high (bp|blood pressure)"), it("Tachycardia", "tachycard"), it("Apnoea", "apnoe", "apne", "stop breath"),
+    it("Nausea and vomiting", "nause", "vomit"), it("Sedation", "sedat", "drows"), it("Hallucinations", "halluc", "emergence", "dissoc")],
+  levetiracetam: NONE_ADV,
+  lignocaine: [it("Stinging at the time of injection", "sting", "burn", "pain")],
+  metoprolol: NONE_ADV,
+  midazolam: [it("Sedation", "sedat", "drows"), it("Respiratory depression", "resp", "breath", "apnoe"), it("Hypotension", "hypotens", "low (bp|blood pressure)"), it("Amnesia", "amnes", "memory")],
+  naloxone: [it("Sweating", "sweat"), it("Tachycardia", "tachycard"), it("Hypertension", "hypertens", "high (bp|blood pressure)")],
+  olanzapine: [it("Sedation", "sedat", "drows")],
+  oxytocin: [it("Abdominal cramping", "cramp", "abdo"), it("Tachycardia", "tachycard"), it("Flushing", "flush")],
+  tenecteplase: [it("Bleeding, commonly superficial (epistaxis, bruising, IV sites)", "bleed", "epistax", "bruis"), it("Dysrhythmia on reperfusion, most often AIVR (needs no specific treatment)", "dysrhythm", "arrhythm", "aivr", "idioventric", "reperfus")],
+  ticagrelor: [BLEED],
+  tranexamic: NONE_ADV
+};
+DRUGS.forEach(d => { if (ADVERSE[d.id]) d.adv = ADVERSE[d.id]; });
+
 </script>
 <script>
 /* ===================== Drug Bag app ===================== */
@@ -3723,6 +3776,7 @@ function buildQuestions(ids, types) {
     const skip = d.skip || [];
     if (types.includes("contra") && d.contra.length && !skip.includes("contra")) qs.push({ id: `${id}-ci`, drug: d, kind: "Contraindications", q: `List the contraindications for ${d.name.toLowerCase()}.`, list: d.contra, mark: v => markList(v, d.contra), model: listText(d.contra) });
     if (types.includes("cautions") && d.cautions.length && !skip.includes("caut")) qs.push({ id: `${id}-caut`, drug: d, kind: "Cautions", q: `List the cautions for ${d.name.toLowerCase()}.`, list: d.cautions, mark: v => markList(v, d.cautions), model: listText(d.cautions) });
+    if (types.includes("adverse") && d.adv) qs.push({ id: `${id}-adv`, drug: d, kind: "Adverse effects", q: `What are the common adverse effects (side effects) of ${d.name.toLowerCase()}?`, list: d.adv, mark: v => markList(v, d.adv), model: listText(d.adv) });
     if (types.includes("moa") && !skip.includes("moa")) qs.push({ id: `${id}-moa`, drug: d, kind: "Mechanism", q: `Describe the mechanism of action of ${d.name.toLowerCase()}.`, mark: v => markKeys(v, d.moaKeys), model: d.moa, selfCheck: true });
     if (types.includes("onset") && d.onsetQ) qs.push({ id: `${id}-onset`, drug: d, kind: "Onset / duration", q: d.onsetQ.q, mark: v => markNums(v, d.onsetQ.nums, d.onsetQ.unit), model: [`Onset: ${d.onset}`, d.duration ? `Duration: ${d.duration}` : ""].filter(Boolean) });
     if (types.includes("extra") && d.extraLists) d.extraLists.forEach((x, i) => qs.push({ id: `${id}-x${i}`, drug: d, kind: "Key point", q: x.q, list: x.items, need: x.need, mark: v => markList(v, x.items, x.need), model: listText(x.items) }));
@@ -3747,7 +3801,7 @@ function drugPicker(el, key) {
 /* =============== FLASHCARDS =============== */
 const SECTIONS = [
   ["full", "Whole monograph"], ["moa", "Mechanism"], ["indications", "Indications"], ["contra", "Contraindications"],
-  ["cautions", "Cautions"], ["dose", "Dose"], ["admin", "Administration"], ["onset", "Onset & duration"], ["key", "Key points"]
+  ["cautions", "Cautions"], ["adverse", "Adverse effects"], ["dose", "Dose"], ["admin", "Administration"], ["onset", "Onset & duration"], ["key", "Key points"]
 ];
 /* video links: any phrase in VIDEO_LINKS (data.js) becomes a link that opens the video in a new tab */
 let VLINK_RX = null;
@@ -3780,19 +3834,21 @@ function hasSection(d, s) {
     case "indications": return !!d.indications.length;
     case "contra": return !skip.includes("contra") && !!d.contra.length;
     case "cautions": return !skip.includes("caut") && !!d.cautions.length;
+    case "adverse": return !!d.adv;
     case "admin": return !!(d.admin && d.admin.length);
     case "onset": return !skip.includes("onset") && !!d.onset;
     case "key": return !!(d.keyPoints && d.keyPoints.length);
     default: return true;
   }
 }
-function sectionBody(d, s) {
+function sectionBody(d, s, ref) {
   switch (s) {
     case "moa": return ul(d.moa) + secVideo(d.id, "moa");
     case "indications": return ul(d.indications);
     case "contra": return ul(d.contra);
     case "cautions": return ul(d.cautions);
-    case "dose": return `<dl class="doses">${d.doses.filter(x => !x.qOnly).map(x => `<dt>${escV(x.label)}</dt><dd>${escV(x.text)}</dd>`).join("")}</dl>`;
+    case "adverse": return d.adv ? ul(d.adv) : "<p>No adverse effects section in the CPG.</p>";
+    case "dose": return `<dl class="doses">${d.doses.filter(x => !x.qOnly && (ref || !x.noTest)).map(x => `<dt>${escV(x.label)}</dt><dd>${escV(x.text)}${x.note ? `<span class="dose-note">${esc(x.note)}</span>` : ""}</dd>`).join("")}</dl>`;
     case "admin": return ul(d.admin || []);
     case "onset": return ul([`Onset: ${d.onset}`, d.duration ? `Duration: ${d.duration}` : null].filter(Boolean));
     case "key": return ul(d.keyPoints || []);
@@ -3839,7 +3895,7 @@ function monographHTML(d, compact) {
     [SCOPE === "para" ? "Route" : "EMT route", d.routes.map(r => routeAbbr(r.t)).join(", ")],
     ["Mechanism", ul(d.moa) + secVideo(d.id, "moa")], ["Indications", ul(d.indications)], d.contra.length ? ["Contraindications", ul(d.contra)] : null, d.cautions.length ? ["Cautions", ul(d.cautions)] : null,
     d.pregnancy ? ["Pregnancy", escV(d.pregnancy)] : null,
-    ["Dose", sectionBody(d, "dose")], d.admin ? ["Administration", ul(d.admin)] : null,
+    ["Dose", sectionBody(d, "dose", true)], d.admin ? ["Administration", ul(d.admin)] : null,
     d.adverse ? ["Adverse effects", escV(d.adverse)] : null,
     d.onset ? ["Onset", escV(d.onset)] : null, d.duration ? ["Duration", escV(d.duration)] : null,
     d.prep ? ["Preparation", escV(d.prep)] : null,
@@ -3900,7 +3956,7 @@ function initFlashcards() {
     const upcoming = all.map(c => s[c.id]).filter(x => x && x.reps && x.due > t).map(x => x.due).sort()[0];
     const medals = store.get("medals", {});
     const mode = store.get("fc-mode", "flip");
-    const perDay = store.get("rv-new2", 7);
+    const perDay = newPerDay();
     const order = learnOrder(); const inc = store.get("rv-drugs", DRUGS.map(d => d.id));
     const nextNew = all.find(c => !s[c.id] || !s[c.id].reps);
     const anyStarted = Object.values(s).some(x => x && x.reps);
@@ -4006,7 +4062,7 @@ function initFlashcards() {
     let cards;
     if (more) {
       const nx = q.all.filter(c => !s[c.id] || !s[c.id].reps);
-      const pick = newOrder() === "mixed" ? nx.slice(0, Math.max(7, store.get("rv-new2", 7))) : nx.length ? nx.filter(c => c.drug === nx[0].drug) : [];
+      const pick = newOrder() === "mixed" ? nx.slice(0, Math.max(8, newPerDay())) : nx.length ? nx.filter(c => c.drug === nx[0].drug) : [];
       cards = pick.map(c => Object.assign(c, { isNew: true }));
     }
     else cards = [...q.due, ...q.fresh];
@@ -4120,7 +4176,7 @@ function runQuestions(play, qs, opts) {
 }
 
 /* =============== TYPED QUIZ =============== */
-const QTYPES = [["dose", "Doses"], ["contra", "Contraindications"], ["cautions", "Cautions"], ["indications", "Indications"], ["routes", "Routes"], ["moa", "Mechanism"], ["onset", "Onset / duration"], ["extra", "Key lists"]];
+const QTYPES = [["dose", "Doses"], ["contra", "Contraindications"], ["cautions", "Cautions"], ["adverse", "Adverse effects"], ["indications", "Indications"], ["routes", "Routes"], ["moa", "Mechanism"], ["onset", "Onset / duration"], ["extra", "Key lists"]];
 function initQuiz() {
   const root = $("#quiz");
   root.innerHTML = `
@@ -4193,7 +4249,7 @@ function initReview() {
     all.forEach(c => counts[cardStage(s[c.id])]++);
     const upcoming = all.map(c => s[c.id]).filter(x => x && x.reps && x.due > t).map(x => x.due).sort()[0];
     const n = due.length + fresh.length;
-    const perDay = store.get("rv-new2", 7);
+    const perDay = newPerDay();
     const freshDrug = freshLabel(fresh);
     const fq = Array.from({ length: 7 }, (_, k) => k === 0 ? due.length : all.filter(c => s[c.id] && s[c.id].reps && s[c.id].due === addDays(t, k)).length);
     const fqMax = Math.max(1, ...fq);
@@ -4203,7 +4259,7 @@ function initReview() {
     const flame = '<svg class="flame-i" viewBox="0 0 24 28" aria-hidden="true"><path fill="currentColor" d="M12 1c1 4.5 6.5 7.5 6.5 14.2A6.5 6.5 0 0 1 12 22a6.5 6.5 0 0 1-6.5-6.8c0-3 1.5-4.9 3-6.3.3 2 1.2 3.3 2.4 3.9C10.4 9 10.6 4.6 12 1z"/></svg>';
     root.innerHTML = `
       <div class="card hero home-hero">
-        <div class="hero-top"><img class="host-face" src="${HOST_FACE}" alt="Your lecturer"><div class="bubble"><p class="greet-main">${myName() ? `Kia ora ${esc(myName())}! Nau mai, haere mai.` : "Kia ora! Nau mai, haere mai."}</p><p class="greet-sub">${sub}</p></div></div>
+        <div class="hero-top"><img class="host-face" src="${HOST_FACE}" alt="Your lecturer"><div class="bubble"><p class="greet-main">${myName() ? `Kia ora ${esc(myName())}! Nau mai, haere mai.` : "Kia ora! Nau mai, haere mai."}</p><p class="greet-sub">${sub}</p></div><img class="hero-amb" src="${AMB}" alt="Cartoon ambulance with a rainbow on the side"></div>
         <p class="hero-kicker">Start here · Today's spaced review</p>
         ${n ? `<h2 class="review-main">${n} ${n === 1 ? "card" : "cards"} to review today</h2><p class="small">${due.length} due · ${fresh.length} new${freshDrug ? ` (${esc(freshDrug)}${fresh.some(c => c.drug !== fresh[0].drug) ? " and the next drug" : ""})` : ""}${held ? ` · ${held} more held until tomorrow` : ""}</p>
           <button class="btn primary big-btn" id="rv-start">Start review</button>`
@@ -4406,9 +4462,11 @@ document.addEventListener("DOMContentLoaded", () => {
    ========================================================== */
 
 const CARD_SECTIONS = [
-  ["ind", "Indications"], ["contra", "Contraindications"], ["caut", "Cautions"], ["dose", "Dose and route"],
+  ["ind", "Indications"], ["contra", "Contraindications"], ["caut", "Cautions"], ["adv", "Adverse effects"], ["dose", "Dose and route"],
   ["moa", "Mechanism of action"], ["onset", "Onset and duration"], ["key", "Key points"]
 ];
+// new cards a day: a drug now has up to 8 cards, so the old 7/14/21 choices become 8/16/24
+const newPerDay = () => { const v = store.get("rv-new2", 8); return ({ 7: 8, 14: 16, 21: 24 })[v] || v; };
 const shortName = d => d.name.replace(" (GTN)", "").replace(" / prednisolone", "/olone");
 const lower = d => d.name.toLowerCase();
 
@@ -4439,16 +4497,17 @@ function buildCards(ids) {
     out.push(listCard("ind", "Indications", d.indications, d.indNeed, `List the ${d.indLabel || "indications"} for ${lower(d)}.`));
     if (!skip.includes("contra")) out.push(listCard("contra", "Contraindications", d.contra, 0, `List the contraindications for ${lower(d)}.`));
     if (!skip.includes("caut")) out.push(listCard("caut", "Cautions", d.cautions, 0, `List the cautions for ${lower(d)}.`));
+    if (d.adv) out.push(listCard("adv", "Adverse effects", d.adv, 0, `What are the common adverse effects (side effects) of ${lower(d)}?`));
     // dose and route: route items plus every dose line that can be marked; others are shown as info
     const doseItems = [
       ...d.routes.map(r => ({ t: "Route: " + r.t, check: v => anyKey(v, r.k) })),
-      ...d.doses.filter(x => !x.qOnly).map(x => ({
+      ...d.doses.filter(x => !x.qOnly && !x.noTest).map(x => ({
         t: `${x.label}: ${x.text}`,
         check: x.ans ? v => hasQty(v, x.ans) : x.nums ? v => hasNums(v, x.nums, x.unit) : x.keys ? v => allKeys(v, x.keys) : null
       }))
     ];
     out.push({ id: `${id}:dose`, drug: d, sec: "dose", label: "Dose and route", q: `What is the ${SCOPE === "para" ? "" : "EMT "}route and dose of ${lower(d)}?`,
-      cover: d.doses.filter(x => !x.qOnly).map(x => x.label), items: doseItems, need: doseItems.filter(i => i.check).length });
+      cover: d.doses.filter(x => !x.qOnly && !x.noTest).map(x => x.label), items: doseItems, need: doseItems.filter(i => i.check).length });
     if (!skip.includes("moa")) out.push({ id: `${id}:moa`, drug: d, sec: "moa", label: "Mechanism of action", q: `Describe the mechanism of action of ${lower(d)}.`,
       items: [{ t: "Key idea: " + (d.moa.find(l => allKeys(l, d.moaKeys)) || d.moa.join(" ")), check: v => allKeys(v, d.moaKeys) }], model: d.moa, need: 1 });
     if (d.onset && !skip.includes("onset")) out.push({ id: `${id}:onset`, drug: d, sec: "onset", label: "Onset and duration", q: `What is the usual onset and duration of ${lower(d)}?`,
@@ -4532,7 +4591,7 @@ function cardQueue() {
     .sort((a, b) => (s[a.id].due < s[b.id].due ? -1 : 1));
   const ts = todayStats();
   const dueToday = due.slice(0, Math.max(0, REVIEW_CAP - (ts.reviewed - ts.newDone)));
-  const perDay = store.get("rv-new2", 7);
+  const perDay = newPerDay();
   const room = Math.max(0, perDay - ts.newDone);
   const fresh = all.filter(c => !s[c.id] || !s[c.id].reps).slice(0, room).map(c => Object.assign(c, { isNew: true }));
   return { all, due: dueToday, held: due.length - dueToday.length, fresh };
@@ -4894,7 +4953,7 @@ function clueItems(d) {
   const allInd = DRUGS.flatMap(x => x.indications.map(i => i.t));
   out.push("Mechanism: " + redact(d.moa.join(" "), d));
   d.indications.forEach(i => { if (allInd.filter(t => t === i.t).length === 1) out.push("Indication: " + redact(i.t, d)); });
-  d.doses.forEach(x => { if (!x.qOnly && !/^see the paediatric/i.test(x.text) && x.label !== "Child") out.push(redact(`${x.label}: ${x.text}`, d)); });
+  d.doses.forEach(x => { if (!x.qOnly && !x.noTest && !/^see the paediatric/i.test(x.text) && x.label !== "Child") out.push(redact(`${x.label}: ${x.text}`, d)); });
   if (d.prep) out.push("Preparation: " + redact(d.prep, d));
   return out;
 }
@@ -5452,7 +5511,7 @@ function initKeyboard() {
 
 /* =============== SETTINGS (gear button in the header) =============== */
 function openSettings() {
-  const perDay = store.get("rv-new2", 7); const mine = myDrugs();
+  const perDay = newPerDay(); const mine = myDrugs();
   const seg = (name, cur, opts) => `<div class="seg-row set-seg">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${String(v) === String(cur) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
   $("#setBody").innerHTML = `
     <div class="set-sec"><p class="lbl"><label for="setname">Your name</label></p>
@@ -5476,8 +5535,8 @@ function openSettings() {
       ${seg("setfc", store.get("fc-mode", "flip"), [["flip", "Flip the card"], ["type", "Type my answer"]])}</div>
     <div class="set-sec"><p class="lbl">Daily goal (correct answers)</p>
       ${seg("setgoal", daily.goal, [5, 10, 20, 30].map(v => [v, v]))}</div>
-    <div class="set-sec"><p class="lbl">New review cards a day (7 cards = one drug)</p>
-      ${seg("setnew", perDay, [[0, "None"], [7, "7"], [14, "14"], [21, "21"]])}</div>
+    <div class="set-sec"><p class="lbl">New review cards a day (8 cards = one drug)</p>
+      ${seg("setnew", perDay, [[0, "None"], [8, "8"], [16, "16"], [24, "24"]])}</div>
     <div class="set-sec"><p class="lbl">Which new cards come next?</p>
       ${seg("setneworder", newOrder(), NEW_ORDERS)}
       <p class="small">${NEW_ORDER_HELP[newOrder()]}</p></div>
@@ -5535,7 +5594,7 @@ function openHelp() {
       <p>Switching never loses progress. Your cards are kept at both levels. You can also change level in Settings (the sliders button), or with the <b>Year 3 Paramedic</b> quick pick in Flashcards.</p>
       <p><b>Then choose your drugs.</b> Open <b>Flashcards</b>. Under <b>Quick pick</b>, tap <b>Semester 2</b> (methoxyflurane, paracetamol, ibuprofen), <b>Semester 3</b> (all 13 EMT drugs) or <b>Year 3 Paramedic</b> (all EMT and paramedic drugs). Your current pick is highlighted. Tap <b>Choose drugs and order</b> to add drugs or change the order you learn them.</p></div>
     <div class="set-sec"><p class="lbl">2 · Every day: your spaced review</p>
-      <p>Tap <b>Start review</b> on Home. Each drug has up to 7 cards (indications, contraindications, cautions, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time, in your order. To mix things up, choose <b>Random drug</b> (the next drug is picked at random) or <b>Mixed cards</b> (any card from any of your drugs, shuffled together) under "Which new cards come next?" in Flashcards or Settings.</p>
+      <p>Tap <b>Start review</b> on Home. Each drug has up to 8 cards (indications, contraindications, cautions, adverse effects, dose and route, mechanism, onset and duration, key points). New cards come one drug at a time, in your order. To mix things up, choose <b>Random drug</b> (the next drug is picked at random) or <b>Mixed cards</b> (any card from any of your drugs, shuffled together) under "Which new cards come next?" in Flashcards or Settings.</p>
       <p>Flip the card or type your answer, then rate yourself honestly:</p>
       <table class="help-rates"><tr><th>Again</th><td>Didn't know it. Back later today and tomorrow.</td></tr><tr><th>Hard</th><td>Patchy or slow. Back sooner.</td></tr><tr><th>Good</th><td>Knew it all. Pushed further out: 1 day, 3 days, then about 7, 18, 45.</td></tr><tr><th>Easy</th><td>Knew it without thinking. Jumps further still.</td></tr></table>
       <p>Ten minutes a day beats a cram. You can stop any time and your ratings are saved.</p></div>
